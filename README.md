@@ -5,5 +5,4 @@ Converts ordinary image to grid of multiple passport sized images
 - After edits, a grid is to be generated according to paper size (A4, A3, ...).
 - This can be printed and cutout.
 - The cutouts can be used as passport sized images required for various stuff/forms.
-
-- Working with 300 DPI.
+- Working with 300 DPI and using 'sharp'.
