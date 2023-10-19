@@ -1,0 +1,8 @@
+.App {
+  display: flex;
+  flex-direction: row;
+}
+.App>* {
+  display: flex;
+  flex-grow: 1;
+}

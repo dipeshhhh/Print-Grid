@@ -68,10 +68,10 @@ function ImageSection() {
 
 function EditImage() {
   return (
-    <>
+    <section className='section edit-image-section'>
       <EditButtons />
       <ImageSection />
-    </>
+    </section>
   )
 }
 
