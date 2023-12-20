@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function EditButtons() {
@@ -52,7 +52,7 @@ function ImageSection() {
         {/* For future: adjust custom image size in the topbar itself */}
         <span className='checkbox'>
           <input id='border-check' type='checkbox' checked={isBordered} onChange={handleCheckboxChange} />
-          <label for='border-check'>Border</label>
+          <label htmlFor='border-check'>Border</label>
         </span>
       </div>
       <div className='image-section-main'>
@@ -98,7 +98,7 @@ function GenerateImage() {
           <option onClick={createCustomSize}>Custom Size</option>
           {
             sizeOptions.map(sizeOption => (
-              <option value={sizeOption} onClick={handleSizeChange}>{sizeOption.name}</option>
+              <option value={sizeOption} onClick={handleSizeChange} key={`${sizeOption.name}`}>{sizeOption.name}</option>
             ))
           }
         </select>
@@ -118,8 +118,20 @@ function GenerateImage() {
 }
 
 function App() {
+  const [theme, setTheme] = useState('dark'); // default to dark
+  // const [theme, setTheme] = useState('light'); // default to light
+
+  const toggleTheme = () => {
+    setTheme((prevTheme) => prevTheme === 'light' ? 'dark' : 'light');
+  };
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', `${theme}`);
+  }, [theme]);
+
   return (
-    <div className="App">
+    <div className={`App ${theme}`}>
+      {/* <button onClick={toggleTheme}>Toggle theme</button> */}
       <EditButtons />
       <ImageSection />
       <GenerateImage />

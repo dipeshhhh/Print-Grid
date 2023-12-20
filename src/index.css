@@ -1,3 +1,21 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:700|Poppins:400');
+
+:root[data-theme="light"] {
+  --text: rgb(8, 15, 23);
+  --background: rgb(234, 237, 240);
+  --primary: rgb(50, 132, 220);
+  --secondary: rgb(140, 190, 243);
+  --accent: rgb(59, 150, 247);
+}
+
+:root[data-theme="dark"] {
+  --text: rgb(232, 239, 247);
+  --background: rgb(15, 18, 21);
+  --primary: rgb(35, 117, 205);
+  --secondary: rgb(12, 62, 115);
+  --accent: rgb(8, 99, 196);
+}
+
 *,
 *::after,
 *::before {
@@ -9,14 +27,31 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Poppins';
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text);
+  background-color: var(--background);
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+h1, h2, h3, h4, h5 {
+  font-family: 'Poppins';
+  font-weight: 700;
 }
+
+html {font-size: 100%;} /* 16px */
+
+h1 {font-size: 4.210rem; /* 67.36px */}
+
+h2 {font-size: 3.158rem; /* 50.56px */}
+
+h3 {font-size: 2.369rem; /* 37.92px */}
+
+h4 {font-size: 1.777rem; /* 28.48px */}
+
+h5 {font-size: 1.333rem; /* 21.28px */}
+
+small {font-size: 0.750rem; /* 12px */}
