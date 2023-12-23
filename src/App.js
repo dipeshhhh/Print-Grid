@@ -131,10 +131,10 @@ function App() {
 
   return (
     <div className='App'>
-      {/* <button onClick={toggleTheme}>Toggle theme</button> */}
       <EditButtons />
       <ImageSection />
       <GenerateImage />
+      <button className='theme-switch-button' onClick={toggleTheme}>Toggle theme</button>
     </div>
   );
 }

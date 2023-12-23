@@ -3,14 +3,29 @@
   --topbar-height: 25px;
   --edit-button-section-width: 50px;
 
+  --toggle-theme-button-width: 50px;
+
   --edit-button-radius: 5px;
+  --section-radius: 10px;
 }
 
 .App {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: var(--edit-button-section-width) repeat(2, 1fr);
   gap: var(--app-gap);
+  padding: var(--app-gap);
   height: 100vh;
+  position: relative;
+}
+
+.theme-switch-button{
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: var(--toggle-theme-button-width) !important;
+  width: var(--toggle-theme-button-width);
+  margin: var(--app-gap);
+  cursor: pointer;
 }
 
 .App > * {
@@ -20,6 +35,9 @@
 .section {
   display: flex;
   flex-direction: column;
+  background-color: var(--background-secondary);
+  border-radius: var(--section-radius);
+  /* padding: var(--app-gap); */
 }
 
 .topbar {
@@ -40,6 +58,7 @@
   flex-direction: column;
   width: var(--edit-button-section-width);
   gap: var(--app-gap);
+  background-color: var(--background);
 }
 
 .sidebar {

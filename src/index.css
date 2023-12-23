@@ -3,6 +3,7 @@
 :root[data-theme="light"] {
   --text: rgb(8, 15, 23);
   --background: rgb(234, 237, 240);
+  --background-secondary: rgb(187, 199, 214);
   --primary: rgb(50, 132, 220);
   --secondary: rgb(140, 190, 243);
   --accent: rgb(59, 150, 247);
@@ -11,6 +12,7 @@
 :root[data-theme="dark"] {
   --text: rgb(232, 239, 247);
   --background: rgb(15, 18, 21);
+  --background-secondary: rgb(32, 38, 44);
   --primary: rgb(35, 117, 205);
   --secondary: rgb(12, 62, 115);
   --accent: rgb(8, 99, 196);
