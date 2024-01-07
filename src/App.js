@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
+// Components
+import EditButton from './Components/EditButton/EditButton.jsx';
+
+// Icons for Edit Buttons
+import SwitchLeftIcon from '@mui/icons-material/SwitchLeft';
+import SwitchRightIcon from '@mui/icons-material/SwitchRight';
+import Rotate90DegreesCcwIcon from '@mui/icons-material/Rotate90DegreesCcw';
+import Rotate90DegreesCwIcon from '@mui/icons-material/Rotate90DegreesCw';
+import FilterBAndWIcon from '@mui/icons-material/FilterBAndW';
+import CropIcon from '@mui/icons-material/Crop';
+import RestoreIcon from '@mui/icons-material/Restore';
+
 function EditButtons() {
   const insertNewImage = () => {
   }
@@ -24,13 +36,13 @@ function EditButtons() {
         <button className='topbar-button' onClick={insertNewImage}>New</button>
       </div>
       <div className='sidebar'>
-        <button className='sidebar-button' onClick={flipLeft}>Flip left</button>
-        <button className='sidebar-button' onClick={flipRight}>Flip right</button>
-        <button className='sidebar-button' onClick={rotateClockwise}>Rotate anti clockwise</button>
-        <button className='sidebar-button' onClick={rotateAntiClockwise}>Rotate clockwise</button>
-        <button className='sidebar-button' onClick={grayscale}>Grayscale</button>
-        <button className='sidebar-button' onClick={crop}>Crop</button>
-        <button className='sidebar-button' onClick={reset}>Reset</button>
+        <EditButton icon={<SwitchLeftIcon/>} text='Flip left' onClickFunction={flipLeft} />
+        <EditButton icon={<SwitchRightIcon/>} text='Flip right' onClickFunction={flipRight} />
+        <EditButton icon={<Rotate90DegreesCwIcon/>} text='Rotate Clockwise' onClickFunction={rotateClockwise} />
+        <EditButton icon={<Rotate90DegreesCcwIcon/>} text='Rotate counter-clockwise' onClickFunction={rotateAntiClockwise} />
+        <EditButton icon={<FilterBAndWIcon/>} text='Grayscale' onClickFunction={grayscale} />
+        <EditButton icon={<CropIcon/>} text='Crop' onClickFunction={crop} />
+        <EditButton icon={<RestoreIcon/>} text='Reset' onClickFunction={reset} />
       </div>
     </section>
   )
@@ -55,11 +67,12 @@ function ImageSection() {
           <label htmlFor='border-check'>Border</label>
         </span>
       </div>
-      <div className='image-section-main'>
+      <div className='image-section-main' onDrop={(e)=>console.log(e)}>
         {
           image ? image :
             // Drag and Drop feature here
-            <button className='primary-button' onClick={uploadImage}>Upload</button>
+            // <button className='primary-button' onClick={uploadImage}>Upload</button>
+            <input type='file' accept='image/*' />
         }
       </div>
     </section>
