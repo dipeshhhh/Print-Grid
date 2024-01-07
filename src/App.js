@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
+
 // Components
 import EditButton from './Components/EditButton/EditButton.jsx';
 
@@ -60,7 +63,7 @@ function ImageSection() {
   return (
     <section className='section image-section'>
       <div className='topbar'>
-        <button className='topbar-button' onClick={imageSizeHandle}>Size</button>
+        <button className='topbar-button topbar-selector' onClick={imageSizeHandle}>Size</button>
         {/* For future: adjust custom image size in the topbar itself */}
         <span className='checkbox'>
           <input id='border-check' type='checkbox' checked={isBordered} onChange={handleCheckboxChange} />
@@ -107,7 +110,7 @@ function GenerateImage() {
   return (
     <section className='section generate-image-section'>
       <div className='topbar'>
-        <select>
+        <select className='topbar-selector'>
           <option onClick={createCustomSize}>Custom Size</option>
           {
             sizeOptions.map(sizeOption => (
@@ -131,23 +134,24 @@ function GenerateImage() {
 }
 
 function App() {
-  const [theme, setTheme] = useState('dark'); // default to dark
-  // const [theme, setTheme] = useState('light'); // default to light
+  const [isDarkTheme, setIsDarkTheme] = useState(true); // default to dark
 
   const toggleTheme = () => {
-    setTheme((prevTheme) => prevTheme === 'light' ? 'dark' : 'light');
+    setIsDarkTheme(!isDarkTheme);
   };
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', `${theme}`);
-  }, [theme]);
+    document.documentElement.setAttribute('data-theme', `${isDarkTheme ? 'dark': 'light'}`);
+  }, [isDarkTheme]);
 
   return (
     <div className='App'>
       <EditButtons />
       <ImageSection />
       <GenerateImage />
-      <button className='theme-switch-button' onClick={toggleTheme}>Toggle theme</button>
+      <button className='theme-switch-button' onClick={toggleTheme}>
+        {isDarkTheme ? <LightModeIcon /> : <DarkModeIcon />}
+      </button>
     </div>
   );
 }

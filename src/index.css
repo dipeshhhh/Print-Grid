@@ -2,19 +2,31 @@
 
 :root[data-theme="light"] {
   --text: rgb(8, 15, 23);
+  --text-disabled: rgba(30, 45, 63, 0.75);
+  --text-translucent: rgba(8, 15, 23, 0.25);
   --background: rgb(234, 237, 240);
+  --background-transulcent: rgba(234, 237, 240, 0.25);
   --background-secondary: rgb(187, 199, 214);
   --primary: rgb(50, 132, 220);
+  --primary-disabled: rgba(46, 98, 153, 0.75);
+  --primary-hover-dark: rgb(45, 119, 199);
   --secondary: rgb(140, 190, 243);
+  --secondary-hover-dark: rgb(121, 163, 209);
   --accent: rgb(59, 150, 247);
 }
 
 :root[data-theme="dark"] {
   --text: rgb(232, 239, 247);
+  --text-disabled: rgba(187, 193, 199, 0.75);
+  --text-translucent: rgba(232, 239, 247, 0.25);
   --background: rgb(15, 18, 21);
+  --background-translucent: rgba(15, 18, 21, 0.25);
   --background-secondary: rgb(32, 38, 44);
   --primary: rgb(35, 117, 205);
+  --primary-disabled: rgba(97, 149, 204, 0.75);
+  --primary-hover-dark: rgb(31, 106, 187);
   --secondary: rgb(12, 62, 115);
+  --secondary-hover-dark: rgb(10, 51, 95);
   --accent: rgb(8, 99, 196);
 }
 
@@ -25,6 +37,7 @@
   padding: 0px;
   box-sizing: border-box;
   /* border: 2px solid; */
+  transition: background-color 175ms;
 }
 
 body {

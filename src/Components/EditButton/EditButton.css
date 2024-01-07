@@ -5,4 +5,10 @@
   border-radius: var(--edit-button-radius);
   cursor: pointer;
   border: none;
+
+  transition: background-color 175ms;
+}
+
+.edit-button:hover{
+  background-color: var(--secondary-hover-dark);
 }

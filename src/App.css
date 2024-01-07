@@ -6,7 +6,10 @@
   --toggle-theme-button-width: 50px;
 
   --edit-button-radius: 5px;
+  --topbar-button-radius: 5px;
   --section-radius: 10px;
+
+  --primary-button-padding: 16px;
 }
 
 .App {
@@ -25,7 +28,19 @@
   height: var(--toggle-theme-button-width) !important;
   width: var(--toggle-theme-button-width);
   margin: var(--app-gap);
+  color: var(--text-translucent);
+  background-color: var(--background-translucent);
+  border-radius: 50%;
+  border-width: 0px;
   cursor: pointer;
+
+  transition: color 175ms;
+  transition: background-color 175ms;
+}
+
+.theme-switch-button:hover{
+  color: var(--text);
+  background-color: var(--background)
 }
 
 .App > * {
@@ -40,6 +55,21 @@
   /* padding: var(--app-gap); */
 }
 
+.primary-button {
+  background-color: var(--primary);
+  color: var(--text);  
+  border-radius: var(--topbar-button-radius);
+  border-width: 0px;
+  cursor: pointer;
+  padding: 0px var(--primary-button-padding);
+}
+
+.primary-button:disabled {
+  background-color: var(--primary-disabled);
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
 .topbar {
   display: flex;
   flex-direction: row;
@@ -50,6 +80,26 @@
 
 .topbar-button {
   min-width: var(--edit-button-section-width);
+  background-color: var(--primary);
+  color: var(--text);
+  border-radius: var(--topbar-button-radius);
+  border-width: 0px;
+  cursor: pointer;
+
+  transition: background-color 175ms;
+}
+
+.topbar-button:hover {
+  background-color: var(--primary-hover-dark);
+}
+
+.topbar-selector{
+  border-radius: var(--topbar-button-radius);
+  background-color: var(--background);
+  border-width: 0px;
+  color: var(--text);
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
 }
 
 /* Edit buttons */
