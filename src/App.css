@@ -4,6 +4,7 @@
   --edit-button-section-width: 50px;
 
   --toggle-theme-button-width: 50px;
+  --file-input-button-width: 88px;
 
   --edit-button-radius: 5px;
   --topbar-button-radius: 5px;
@@ -21,7 +22,7 @@
   position: relative;
 }
 
-.theme-switch-button{
+.theme-switch-button {
   position: absolute;
   top: 0;
   right: 0;
@@ -38,12 +39,12 @@
   transition: background-color 175ms;
 }
 
-.theme-switch-button:hover{
+.theme-switch-button:hover {
   color: var(--text);
   background-color: var(--background)
 }
 
-.App > * {
+.App>* {
   height: 100%;
 }
 
@@ -52,12 +53,12 @@
   flex-direction: column;
   background-color: var(--background-secondary);
   border-radius: var(--section-radius);
-  /* padding: var(--app-gap); */
+  max-height: calc(100vh - ( var(--app-gap) * 2 ));
 }
 
 .primary-button {
   background-color: var(--primary);
-  color: var(--text);  
+  color: var(--text);
   border-radius: var(--topbar-button-radius);
   border-width: 0px;
   cursor: pointer;
@@ -93,13 +94,14 @@
   background-color: var(--primary-hover-dark);
 }
 
-.topbar-selector{
-  border-radius: var(--topbar-button-radius);
-  background-color: var(--background);
-  border-width: 0px;
+.topbar-selector {
   color: var(--text);
+  background-color: var(--background);
+  border-radius: var(--topbar-button-radius);
+  border-width: 0px;
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
+  cursor: pointer;
 }
 
 /* Edit buttons */
@@ -117,6 +119,7 @@
   flex-grow: 1;
   gap: var(--app-gap);
 }
+
 /* Edit buttons END */
 
 /* Image section */
@@ -124,12 +127,24 @@
   display: flex;
   flex-grow: 1;
 }
+
 .image-section-main {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
 }
+
+.image-preview {
+  max-width: 100%;
+  max-height: calc( 100vh - 64px );
+}
+
+.file-input-text-hidden{
+  width: var(--file-input-button-width);
+  overflow: hidden;
+}
+
 /* Image section END */
 
 /* Generate image section */
@@ -137,10 +152,12 @@
   display: flex;
   flex-grow: 1;
 }
+
 .generate-image-section-main {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
 }
+
 /* Generate image section END */

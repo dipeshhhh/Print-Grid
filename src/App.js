@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
-
 // Components
+import ThemeSwitchButton from './Components/ThemeSwitchButton/ThemeSwitchButton.jsx';
 import EditButton from './Components/EditButton/EditButton.jsx';
 
 // Icons for Edit Buttons
@@ -16,7 +14,7 @@ import FilterBAndWIcon from '@mui/icons-material/FilterBAndW';
 import CropIcon from '@mui/icons-material/Crop';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-function EditButtons() {
+function EditButtons({ isEditDisabled }) {
   const insertNewImage = () => {
   }
   const flipLeft = () => {
@@ -33,33 +31,57 @@ function EditButtons() {
   }
   const reset = () => {
   }
+  const buttons = [
+    { icon: <SwitchLeftIcon />, text: 'Flip left', onClickFunction: flipLeft },
+    { icon: <SwitchRightIcon />, text: 'Flip right', onClickFunction: flipRight },
+    { icon: <Rotate90DegreesCwIcon />, text: 'Rotate Clockwise', onClickFunction: rotateClockwise },
+    { icon: <Rotate90DegreesCcwIcon />, text: 'Rotate counter-clockwise', onClickFunction: rotateAntiClockwise },
+    { icon: <FilterBAndWIcon />, text: 'Grayscale', onClickFunction: grayscale },
+    { icon: <CropIcon />, text: 'Crop', onClickFunction: crop },
+    { icon: <RestoreIcon />, text: 'Reset', onClickFunction: reset },
+  ];
   return (
     <section className='section edit-buttons-section'>
       <div className='topbar'>
         <button className='topbar-button' onClick={insertNewImage}>New</button>
       </div>
       <div className='sidebar'>
-        <EditButton icon={<SwitchLeftIcon/>} text='Flip left' onClickFunction={flipLeft} />
-        <EditButton icon={<SwitchRightIcon/>} text='Flip right' onClickFunction={flipRight} />
-        <EditButton icon={<Rotate90DegreesCwIcon/>} text='Rotate Clockwise' onClickFunction={rotateClockwise} />
-        <EditButton icon={<Rotate90DegreesCcwIcon/>} text='Rotate counter-clockwise' onClickFunction={rotateAntiClockwise} />
-        <EditButton icon={<FilterBAndWIcon/>} text='Grayscale' onClickFunction={grayscale} />
-        <EditButton icon={<CropIcon/>} text='Crop' onClickFunction={crop} />
-        <EditButton icon={<RestoreIcon/>} text='Reset' onClickFunction={reset} />
+        {buttons.map(button => (
+          <EditButton
+            key={button.text}
+            icon={button.icon}
+            text={button.text}
+            onClickFunction={button.onClickFunction}
+            isEditDisabled={isEditDisabled}
+          />
+        ))}
       </div>
     </section>
   )
 }
 
-function ImageSection() {
-  const [image, setImage] = useState(null);
-  const [isBordered, setIsBordered] = useState(false);
-
+function ImageSection({ image, setImage, imagePreview, setImagePreview, isBordered, setIsBordered, setIsGenerateDisabled, setIsEditDisabled }) {
   const handleCheckboxChange = () => { setIsBordered(!isBordered); }
-  const imageSizeHandle = () => {
+  const imageSizeHandle = () => {}
+  const uploadImage = (e) => {
+    if (e.target.files && (e.target.files.length > 0) && e.target.files[0].type.startsWith('image/')) {
+      setImage(e.target.files[0])
+    }
+    else {
+      alert('Please select an image file.')
+    }
   }
-  const uploadImage = () => {
-  }
+
+  useEffect(() => {
+    if (!image) return;
+    const imageUrl = URL.createObjectURL(image);
+    setImagePreview(imageUrl);
+    setIsGenerateDisabled(false);
+    setIsEditDisabled(false);
+
+    // URL.revokeObjectURL(imageUrl) // Free memory
+  }, [image])
+
   return (
     <section className='section image-section'>
       <div className='topbar'>
@@ -70,24 +92,34 @@ function ImageSection() {
           <label htmlFor='border-check'>Border</label>
         </span>
       </div>
-      <div className='image-section-main' onDrop={(e)=>console.log(e)}>
+      <div className='image-section-main' onDrop={uploadImage}
+        onDragOver={(e) => {
+          e.preventDefault();
+        }}
+      >
         {
-          image ? image :
+          image ?
+            <img className='image-preview' src={imagePreview} />
+            :
             // Drag and Drop feature here
-            // <button className='primary-button' onClick={uploadImage}>Upload</button>
-            <input type='file' accept='image/*' />
+
+            <input type='file' className='file-input-text-hidden' accept='image/*' onChange={uploadImage} />
         }
       </div>
     </section>
   )
 }
 
-function GenerateImage() {
+function GenerateImage({ isGenerateDisabled }) {
   const [resultImage, setResultImage] = useState(null);
-  const [isGenerateDisabled, setIsGenerateDisabled] = useState(true);
   const [isDownloadDisabled, setIsDownloadDisabled] = useState(true);
 
   const generateResultImage = () => {
+    let imageGeneratedSuccessfully = true //! Currently set true for testing
+    if (imageGeneratedSuccessfully) {
+      // Handling download button state upon successful result image generation
+      setIsDownloadDisabled(false);
+    }
   }
   const downloadImage = () => {
   }
@@ -134,24 +166,42 @@ function GenerateImage() {
 }
 
 function App() {
-  const [isDarkTheme, setIsDarkTheme] = useState(true); // default to dark
+  // Required variables and constants
+  let currentDPI = 300;
+  const integerRoundingFactor = 2.54 / 2.5; /// Factor to round cm to px conversion, preserving aspect ratio.
+  const cmToPx = (cm) => (((cm * currentDPI) / 2.54) * integerRoundingFactor);
 
-  const toggleTheme = () => {
-    setIsDarkTheme(!isDarkTheme);
-  };
+  // Edit buttons and Generate button's state
+  const [isGenerateDisabled, setIsGenerateDisabled] = useState(true);
+  const [isEditDisabled, setIsEditDisabled] = useState(true);
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', `${isDarkTheme ? 'dark': 'light'}`);
-  }, [isDarkTheme]);
+  // Image
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isBordered, setIsBordered] = useState(false);
 
   return (
     <div className='App'>
-      <EditButtons />
-      <ImageSection />
-      <GenerateImage />
-      <button className='theme-switch-button' onClick={toggleTheme}>
-        {isDarkTheme ? <LightModeIcon /> : <DarkModeIcon />}
-      </button>
+      <EditButtons
+        isEditDisabled={isEditDisabled}
+      />
+
+      <ImageSection
+        image={image}
+        setImage={setImage}
+        imagePreview={imagePreview}
+        setImagePreview={setImagePreview}
+        isBordered={isBordered}
+        setIsBordered={setIsBordered}
+        setIsGenerateDisabled={setIsGenerateDisabled}
+        setIsEditDisabled={setIsEditDisabled}
+      />
+
+      <GenerateImage
+        isGenerateDisabled={isGenerateDisabled}
+      />
+
+      <ThemeSwitchButton />
     </div>
   );
 }

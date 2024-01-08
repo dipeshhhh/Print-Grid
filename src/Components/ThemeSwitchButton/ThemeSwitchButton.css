@@ -1,0 +1,21 @@
+.theme-switch-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: var(--toggle-theme-button-width) !important;
+  width: var(--toggle-theme-button-width);
+  margin: var(--app-gap);
+  color: var(--text-translucent);
+  background-color: var(--background-translucent);
+  border-radius: 50%;
+  border-width: 0px;
+  cursor: pointer;
+
+  transition: color 175ms;
+  transition: background-color 175ms;
+}
+
+.theme-switch-button:hover {
+  color: var(--text);
+  background-color: var(--background)
+}

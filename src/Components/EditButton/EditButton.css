@@ -12,3 +12,9 @@
 .edit-button:hover{
   background-color: var(--secondary-hover-dark);
 }
+
+.edit-button:disabled {
+  background-color: var(--secondary-disabled);
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
