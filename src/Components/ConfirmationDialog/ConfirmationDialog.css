@@ -2,19 +2,21 @@
   --dialog-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.75);
   --dialog-button-radius: var(--button-radius);
   --dialog-button-padding: 10px 20px;
+  --dialog-padding: 20px;
 }
 
 .confirmation-dialog {
   background-color: var(--background-secondary);
   color: var(--text);
   box-shadow: var(--dialog-shadow);
+  border-radius: var(--container-radius);
+  border-width: 0px;
   z-index: 100;
-  border: 0px;
-  border-radius: 10px;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: min(95vw, 500px);
 }
 
 .confirmation-dialog::backdrop {
@@ -23,14 +25,18 @@
 }
 
 .dialog-text {
-  padding: 20px;
+  padding: var(--dialog-padding);
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
 }
 
 .dialog-buttons {
+  padding: var(--dialog-padding);
   background-color: var(--background);
   display: flex;
   justify-content: space-between;
-  padding: 20px;
+  gap: var(--dialog-padding);
 }
 
 .dialog-button {

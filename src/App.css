@@ -8,7 +8,7 @@
 
   --edit-button-radius: var(--button-radius);
   --topbar-button-radius: var(--button-radius);
-  --section-radius: 10px;
+  --section-radius: var(--container-radius);
 
   --primary-button-padding: 16px;
 }

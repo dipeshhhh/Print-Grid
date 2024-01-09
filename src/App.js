@@ -89,7 +89,7 @@ function ImageSection({ uploadImage, image, imagePreview, isBordered, setIsBorde
       >
         {
           image ?
-            <img className='image-preview' src={imagePreview} />
+            <img className='image-preview' src={imagePreview} alt='Uploaded image preview' />
             :
             // Drag and Drop feature here
 
