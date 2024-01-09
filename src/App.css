@@ -6,8 +6,8 @@
   --toggle-theme-button-width: 50px;
   --file-input-button-width: 88px;
 
-  --edit-button-radius: 5px;
-  --topbar-button-radius: 5px;
+  --edit-button-radius: var(--button-radius);
+  --topbar-button-radius: var(--button-radius);
   --section-radius: 10px;
 
   --primary-button-padding: 16px;
@@ -20,28 +20,6 @@
   padding: var(--app-gap);
   height: 100vh;
   position: relative;
-}
-
-.theme-switch-button {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: var(--toggle-theme-button-width) !important;
-  width: var(--toggle-theme-button-width);
-  margin: var(--app-gap);
-  color: var(--text-translucent);
-  background-color: var(--background-translucent);
-  border-radius: 50%;
-  border-width: 0px;
-  cursor: pointer;
-
-  transition: color 175ms;
-  transition: background-color 175ms;
-}
-
-.theme-switch-button:hover {
-  color: var(--text);
-  background-color: var(--background)
 }
 
 .App>* {

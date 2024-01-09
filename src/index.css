@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css?family=Poppins:700|Poppins:400');
 
+:root{
+  --button-radius: 5px;
+}
+
 :root[data-theme="light"] {
   --text: rgb(8, 15, 23);
   --text-disabled: rgba(8, 15, 23, 0.5);

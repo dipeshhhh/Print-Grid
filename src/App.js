@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 // Components
 import ThemeSwitchButton from './Components/ThemeSwitchButton/ThemeSwitchButton.jsx';
 import EditButton from './Components/EditButton/EditButton.jsx';
+import ConfirmationDialog from './Components/ConfirmationDialog/ConfirmationDialog.jsx';
 
 // Icons for Edit Buttons
 import SwitchLeftIcon from '@mui/icons-material/SwitchLeft';
@@ -14,23 +15,24 @@ import FilterBAndWIcon from '@mui/icons-material/FilterBAndW';
 import CropIcon from '@mui/icons-material/Crop';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-function EditButtons({ isEditDisabled }) {
-  const insertNewImage = () => {
+function EditButtons({ uploadImage, image, isEditDisabled }) {
+  const confirmNewImageDialog = useRef(null);
+  const handleNewImageButton = () => {
+    if (image) {
+      confirmNewImageDialog.current.showModal();
+    }
+    else {
+      uploadNewImage()
+    }
   }
-  const flipLeft = () => {
-  }
-  const flipRight = () => {
-  }
-  const rotateClockwise = () => {
-  }
-  const rotateAntiClockwise = () => {
-  }
-  const grayscale = () => {
-  }
-  const crop = () => {
-  }
-  const reset = () => {
-  }
+  const uploadNewImage = () => { }
+  const flipLeft = () => { }
+  const flipRight = () => { }
+  const rotateClockwise = () => { }
+  const rotateAntiClockwise = () => { }
+  const grayscale = () => { }
+  const crop = () => { }
+  const reset = () => { }
   const buttons = [
     { icon: <SwitchLeftIcon />, text: 'Flip left', onClickFunction: flipLeft },
     { icon: <SwitchRightIcon />, text: 'Flip right', onClickFunction: flipRight },
@@ -43,7 +45,13 @@ function EditButtons({ isEditDisabled }) {
   return (
     <section className='section edit-buttons-section'>
       <div className='topbar'>
-        <button className='topbar-button' onClick={insertNewImage}>New</button>
+        <button className='topbar-button' onClick={handleNewImageButton}>New</button>
+        <ConfirmationDialog
+          title={'Open new image?'}
+          message={'This will discard all changes made to the current image.'}
+          referrer={confirmNewImageDialog}
+          onConfirm={uploadNewImage}
+        />
       </div>
       <div className='sidebar'>
         {buttons.map(button => (
@@ -60,27 +68,9 @@ function EditButtons({ isEditDisabled }) {
   )
 }
 
-function ImageSection({ image, setImage, imagePreview, setImagePreview, isBordered, setIsBordered, setIsGenerateDisabled, setIsEditDisabled }) {
+function ImageSection({ uploadImage, image, imagePreview, isBordered, setIsBordered }) {
   const handleCheckboxChange = () => { setIsBordered(!isBordered); }
-  const imageSizeHandle = () => {}
-  const uploadImage = (e) => {
-    if (e.target.files && (e.target.files.length > 0) && e.target.files[0].type.startsWith('image/')) {
-      setImage(e.target.files[0])
-    }
-    else {
-      alert('Please select an image file.')
-    }
-  }
-
-  useEffect(() => {
-    if (!image) return;
-    const imageUrl = URL.createObjectURL(image);
-    setImagePreview(imageUrl);
-    setIsGenerateDisabled(false);
-    setIsEditDisabled(false);
-
-    // URL.revokeObjectURL(imageUrl) // Free memory
-  }, [image])
+  const imageSizeHandle = () => { }
 
   return (
     <section className='section image-section'>
@@ -179,22 +169,37 @@ function App() {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isBordered, setIsBordered] = useState(false);
+  const uploadImage = (e) => {
+    if (e.target.files && (e.target.files.length > 0) && e.target.files[0].type.startsWith('image/')) {
+      setImage(e.target.files[0])
+    }
+    else {
+      alert('Please select an image file.')
+    }
+  }
+  useEffect(() => {
+    if (!image) return;
+    const imageUrl = URL.createObjectURL(image);
+    setImagePreview(imageUrl);
+    setIsGenerateDisabled(false);
+    setIsEditDisabled(false);
+    // URL.revokeObjectURL(imageUrl) // Free memory
+  }, [image])
 
   return (
     <div className='App'>
       <EditButtons
+        uploadImage={uploadImage}
+        image={image}
         isEditDisabled={isEditDisabled}
       />
 
       <ImageSection
+        uploadImage={uploadImage}
         image={image}
-        setImage={setImage}
         imagePreview={imagePreview}
-        setImagePreview={setImagePreview}
         isBordered={isBordered}
         setIsBordered={setIsBordered}
-        setIsGenerateDisabled={setIsGenerateDisabled}
-        setIsEditDisabled={setIsEditDisabled}
       />
 
       <GenerateImage
