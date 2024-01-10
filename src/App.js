@@ -15,7 +15,7 @@ import FilterBAndWIcon from '@mui/icons-material/FilterBAndW';
 import CropIcon from '@mui/icons-material/Crop';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-function EditButtons({ uploadImage, image, isEditDisabled }) {
+function EditButtons({ image, isEditDisabled, inputReferrer }) {
   const confirmNewImageDialog = useRef(null);
   const handleNewImageButton = () => {
     if (image) {
@@ -25,7 +25,7 @@ function EditButtons({ uploadImage, image, isEditDisabled }) {
       uploadNewImage()
     }
   }
-  const uploadNewImage = () => { }
+  const uploadNewImage = () => { inputReferrer.current.click(); }
   const flipLeft = () => { }
   const flipRight = () => { }
   const rotateClockwise = () => { }
@@ -68,9 +68,17 @@ function EditButtons({ uploadImage, image, isEditDisabled }) {
   )
 }
 
-function ImageSection({ uploadImage, image, imagePreview, isBordered, setIsBordered }) {
+function ImageSection({ uploadImage, image, imagePreview, isBordered, setIsBordered, inputReferrer }) {
   const handleCheckboxChange = () => { setIsBordered(!isBordered); }
   const imageSizeHandle = () => { }
+  const hiddenFileInputCss = {
+    position: 'absolute',
+    opacity: '0',
+    height: '0.1px',
+    width: '0.1px',
+    overflow: 'hidden',
+    zIndex: '-1',
+  }
 
   return (
     <section className='section image-section'>
@@ -88,13 +96,11 @@ function ImageSection({ uploadImage, image, imagePreview, isBordered, setIsBorde
         }}
       >
         {
-          image ?
-            <img className='image-preview' src={imagePreview} alt='Uploaded image preview' />
-            :
-            // Drag and Drop feature here
-
-            <input type='file' className='file-input-text-hidden' accept='image/*' onChange={uploadImage} />
+          image &&
+          <img className='image-preview' src={imagePreview} alt='Uploaded image preview' />
         }
+        <input type='file' className='file-input-text-hidden' accept='image/*' onChange={uploadImage} style={image ? hiddenFileInputCss : {}} ref={inputReferrer}/>
+
       </div>
     </section>
   )
@@ -186,12 +192,16 @@ function App() {
     // URL.revokeObjectURL(imageUrl) // Free memory
   }, [image])
 
+  // Input Referrer
+  const inputReferrer = useRef(null);
+
   return (
     <div className='App'>
       <EditButtons
         uploadImage={uploadImage}
         image={image}
         isEditDisabled={isEditDisabled}
+        inputReferrer={inputReferrer}
       />
 
       <ImageSection
@@ -200,6 +210,7 @@ function App() {
         imagePreview={imagePreview}
         isBordered={isBordered}
         setIsBordered={setIsBordered}
+        inputReferrer={inputReferrer}
       />
 
       <GenerateImage
