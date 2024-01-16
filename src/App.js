@@ -7,18 +7,18 @@ import EditButton from './Components/EditButton/EditButton.jsx';
 import ConfirmationDialog from './Components/ConfirmationDialog/ConfirmationDialog.jsx';
 
 // Icons for Edit Buttons
-import SwitchLeftIcon from '@mui/icons-material/SwitchLeft';
-import SwitchRightIcon from '@mui/icons-material/SwitchRight';
+import SwapVertIcon from '@mui/icons-material/SwapVert';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import Rotate90DegreesCcwIcon from '@mui/icons-material/Rotate90DegreesCcw';
 import Rotate90DegreesCwIcon from '@mui/icons-material/Rotate90DegreesCw';
 import FilterBAndWIcon from '@mui/icons-material/FilterBAndW';
 import CropIcon from '@mui/icons-material/Crop';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-function EditButtons({ image, isEditDisabled, inputReferrer }) {
+function EditButtons({ image, setImage, isEditDisabled, inputReferrer }) {
   const confirmNewImageDialog = useRef(null);
   const handleNewImageButton = () => {
-    if (image) {
+    if (image.imageUrl) {
       confirmNewImageDialog.current.showModal();
     }
     else {
@@ -26,16 +26,16 @@ function EditButtons({ image, isEditDisabled, inputReferrer }) {
     }
   }
   const uploadNewImage = () => { inputReferrer.current.click(); }
-  const flipLeft = () => { }
-  const flipRight = () => { }
-  const rotateClockwise = () => { }
-  const rotateAntiClockwise = () => { }
-  const grayscale = () => { }
+  const flipHorizontal = () => { setImage({ ...image, verticalScale: image.verticalScale === 1 ? -1 : 1 }) }
+  const flipVertical = () => { setImage({ ...image, horizontalScale: image.horizontalScale === 1 ? -1 : 1 }) }
+  const rotateClockwise = () => { setImage({ ...image, rotate: image.rotate + 90 }) }
+  const rotateAntiClockwise = () => { setImage({ ...image, rotate: image.rotate - 90 }) }
+  const grayscale = () => { setImage({ ...image, grayscale: image.grayscale === 1 ? 0 : 1 }) }
   const crop = () => { }
   const reset = () => { }
   const buttons = [
-    { icon: <SwitchLeftIcon />, text: 'Flip left', onClickFunction: flipLeft },
-    { icon: <SwitchRightIcon />, text: 'Flip right', onClickFunction: flipRight },
+    { icon: <SwapVertIcon />, text: 'Flip left', onClickFunction: flipVertical },
+    { icon: <SwapHorizIcon />, text: 'Flip right', onClickFunction: flipHorizontal, },
     { icon: <Rotate90DegreesCwIcon />, text: 'Rotate Clockwise', onClickFunction: rotateClockwise },
     { icon: <Rotate90DegreesCcwIcon />, text: 'Rotate counter-clockwise', onClickFunction: rotateAntiClockwise },
     { icon: <FilterBAndWIcon />, text: 'Grayscale', onClickFunction: grayscale },
@@ -68,7 +68,7 @@ function EditButtons({ image, isEditDisabled, inputReferrer }) {
   )
 }
 
-function ImageSection({ uploadImage, image, imagePreview, isBordered, setIsBordered, inputReferrer }) {
+function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputReferrer }) {
   const handleCheckboxChange = () => { setIsBordered(!isBordered); }
   const imageSizeHandle = () => { }
   const hiddenFileInputCss = {
@@ -96,10 +96,34 @@ function ImageSection({ uploadImage, image, imagePreview, isBordered, setIsBorde
         }}
       >
         {
-          image &&
-          <img className='image-preview' src={imagePreview} alt='Uploaded image preview' />
+          image.imageUrl &&
+          <img
+            className='image-preview'
+            src={image.imageUrl}
+            alt='Upload preview'
+            style={{
+              transform: `
+                rotate(${image.rotate}deg)
+                scale(${image.verticalScale}, ${image.horizontalScale})
+              `,
+              filter: `
+                brightness(${image.brightness}%)
+                contrast(${image.contrast}%)
+                saturate(${image.saturate}%)
+                grayscale(${image.grayscale})
+                sepia(${image.sepia}%)
+                hue-rotate(${image.hueRotate}deg)
+              `,
+            }}
+          />
         }
-        <input type='file' className='file-input-text-hidden' accept='image/*' onChange={uploadImage} style={image ? hiddenFileInputCss : {}} ref={inputReferrer}/>
+        <input
+          type='file'
+          className='file-input-text-hidden'
+          accept='image/*' onChange={uploadImage}
+          style={image.imageUrl ? hiddenFileInputCss : {}}
+          ref={inputReferrer}
+        />
 
       </div>
     </section>
@@ -172,24 +196,33 @@ function App() {
   const [isEditDisabled, setIsEditDisabled] = useState(true);
 
   // Image
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [image, setImage] = useState({
+    imageUrl: false,
+    brightness: 100,
+    contrast: 100,
+    saturate: 100,
+    hueRotate: 0,
+    grayscale: 0,
+    sepia: 0,
+    rotate: 0,
+    verticalScale: 1,
+    horizontalScale: 1
+  });
   const [isBordered, setIsBordered] = useState(false);
   const uploadImage = (e) => {
     if (e.target.files && (e.target.files.length > 0) && e.target.files[0].type.startsWith('image/')) {
-      setImage(e.target.files[0])
+      const imageUrl = URL.createObjectURL(e.target.files[0]);
+      setImage({ ...image, imageUrl: imageUrl })
+      // URL.revokeObjectURL(imageUrl) // Free memory
     }
     else {
       alert('Please select an image file.')
     }
   }
   useEffect(() => {
-    if (!image) return;
-    const imageUrl = URL.createObjectURL(image);
-    setImagePreview(imageUrl);
-    setIsGenerateDisabled(false);
+    if (!image.imageUrl) return;
     setIsEditDisabled(false);
-    // URL.revokeObjectURL(imageUrl) // Free memory
+    setIsGenerateDisabled(false);
   }, [image])
 
   // Input Referrer
@@ -200,6 +233,7 @@ function App() {
       <EditButtons
         uploadImage={uploadImage}
         image={image}
+        setImage={setImage}
         isEditDisabled={isEditDisabled}
         inputReferrer={inputReferrer}
       />
@@ -207,7 +241,6 @@ function App() {
       <ImageSection
         uploadImage={uploadImage}
         image={image}
-        imagePreview={imagePreview}
         isBordered={isBordered}
         setIsBordered={setIsBordered}
         inputReferrer={inputReferrer}
