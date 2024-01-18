@@ -34,7 +34,20 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef }) {
   const rotateAntiClockwise = () => { setImage({ ...image, rotate: image.rotate - 90 }) }
   const grayscale = () => { setImage({ ...image, grayscale: image.grayscale === 1 ? 0 : 1 }) }
   const crop = () => { cropImageDialogRef.current.showModal() }
-  const reset = () => { }
+  const reset = () => {
+    setImage({
+      imageUrl: image.imageUrl,
+      brightness: 100,
+      contrast: 100,
+      saturate: 100,
+      hueRotate: 0,
+      grayscale: 0,
+      sepia: 0,
+      rotate: 0,
+      verticalScale: 1,
+      horizontalScale: 1,
+    });
+  }
   const buttons = [
     { icon: <SwapVertIcon />, text: 'Flip left', onClickFunction: flipVertical },
     { icon: <SwapHorizIcon />, text: 'Flip right', onClickFunction: flipHorizontal, },
@@ -219,15 +232,44 @@ function App() {
   const uploadImage = (e) => {
     if (e.target.files && (e.target.files.length > 0) && e.target.files[0].type.startsWith('image/')) {
       const imageUrl = URL.createObjectURL(e.target.files[0]);
-      setImage({ ...image, imageUrl: imageUrl })
+      setImage({
+        imageUrl: imageUrl,
+        brightness: 100,
+        contrast: 100,
+        saturate: 100,
+        hueRotate: 0,
+        grayscale: 0,
+        sepia: 0,
+        rotate: 0,
+        verticalScale: 1,
+        horizontalScale: 1
+      })
       // URL.revokeObjectURL(imageUrl) // Free memory
     }
     else {
       alert('Please select an image file.')
     }
   }
+  const resetImageFilters = () => {
+    setImage({
+      imageUrl: image.imageUrl,
+      brightness: 100,
+      contrast: 100,
+      saturate: 100,
+      hueRotate: 0,
+      grayscale: 0,
+      sepia: 0,
+      rotate: 0,
+      verticalScale: 1,
+      horizontalScale: 1
+    })
+  }
   useEffect(() => {
-    if (!image.imageUrl) return;
+    if (!image.imageUrl) {
+      setIsEditDisabled(true);
+      setIsGenerateDisabled(true);
+      return;
+    };
     setIsEditDisabled(false);
     setIsGenerateDisabled(false);
   }, [image])
