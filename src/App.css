@@ -111,11 +111,14 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+  overflow: overlay;
+  overflow-x: hidden;
 }
 
 .image-preview {
   max-width: 100%;
   max-height: calc( 100vh - 64px );
+  transition: all 150ms ease-in-out 0s;
 }
 
 .file-input-text-hidden{
