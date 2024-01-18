@@ -4,7 +4,8 @@ import './App.css';
 // Components
 import ThemeSwitchButton from './Components/ThemeSwitchButton/ThemeSwitchButton.jsx';
 import EditButton from './Components/EditButton/EditButton.jsx';
-import ConfirmationDialog from './Components/ConfirmationDialog/ConfirmationDialog.jsx';
+import ConfirmationDialog from './Components/Dialogs/ConfirmationDialog/ConfirmationDialog.jsx';
+import CropImageDialog from './Components/Dialogs/CropImageDialog/CropImageDialog.jsx';
 
 // Icons for Edit Buttons
 import SwapVertIcon from '@mui/icons-material/SwapVert';
@@ -15,23 +16,24 @@ import FilterBAndWIcon from '@mui/icons-material/FilterBAndW';
 import CropIcon from '@mui/icons-material/Crop';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-function EditButtons({ image, setImage, isEditDisabled, inputReferrer }) {
-  const confirmNewImageDialog = useRef(null);
+function EditButtons({ image, setImage, isEditDisabled, inputRef }) {
+  const cropImageDialogRef = useRef(null);
+  const confirmNewImageDialogRef = React.createRef();
   const handleNewImageButton = () => {
     if (image.imageUrl) {
-      confirmNewImageDialog.current.showModal();
+      confirmNewImageDialogRef.current.showModal();
     }
     else {
-      uploadNewImage()
+      uploadNewImage();
     }
   }
-  const uploadNewImage = () => { inputReferrer.current.click(); }
+  const uploadNewImage = () => { inputRef.current.click(); }
   const flipHorizontal = () => { setImage({ ...image, verticalScale: image.verticalScale === 1 ? -1 : 1 }) }
   const flipVertical = () => { setImage({ ...image, horizontalScale: image.horizontalScale === 1 ? -1 : 1 }) }
   const rotateClockwise = () => { setImage({ ...image, rotate: image.rotate + 90 }) }
   const rotateAntiClockwise = () => { setImage({ ...image, rotate: image.rotate - 90 }) }
   const grayscale = () => { setImage({ ...image, grayscale: image.grayscale === 1 ? 0 : 1 }) }
-  const crop = () => { }
+  const crop = () => { cropImageDialogRef.current.showModal() }
   const reset = () => { }
   const buttons = [
     { icon: <SwapVertIcon />, text: 'Flip left', onClickFunction: flipVertical },
@@ -49,7 +51,7 @@ function EditButtons({ image, setImage, isEditDisabled, inputReferrer }) {
         <ConfirmationDialog
           title={'Open new image?'}
           message={'This will discard all changes made to the current image.'}
-          referrer={confirmNewImageDialog}
+          referrer={confirmNewImageDialogRef}
           onConfirm={uploadNewImage}
         />
       </div>
@@ -64,11 +66,16 @@ function EditButtons({ image, setImage, isEditDisabled, inputReferrer }) {
           />
         ))}
       </div>
+      <CropImageDialog
+        referrer={cropImageDialogRef}
+        image={image}
+        setImage={setImage}
+      />
     </section>
   )
 }
 
-function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputReferrer }) {
+function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef }) {
   const handleCheckboxChange = () => { setIsBordered(!isBordered); }
   const imageSizeHandle = () => { }
   const hiddenFileInputCss = {
@@ -122,7 +129,7 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRefe
           className='file-input-text-hidden'
           accept='image/*' onChange={uploadImage}
           style={image.imageUrl ? hiddenFileInputCss : {}}
-          ref={inputReferrer}
+          ref={inputRef}
         />
 
       </div>
@@ -226,7 +233,7 @@ function App() {
   }, [image])
 
   // Input Referrer
-  const inputReferrer = useRef(null);
+  const inputRef = useRef(null);
 
   return (
     <div className='App'>
@@ -235,7 +242,7 @@ function App() {
         image={image}
         setImage={setImage}
         isEditDisabled={isEditDisabled}
-        inputReferrer={inputReferrer}
+        inputRef={inputRef}
       />
 
       <ImageSection
@@ -243,7 +250,7 @@ function App() {
         image={image}
         isBordered={isBordered}
         setIsBordered={setIsBordered}
-        inputReferrer={inputReferrer}
+        inputRef={inputRef}
       />
 
       <GenerateImage

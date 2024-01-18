@@ -5,7 +5,7 @@
   --dialog-padding: 20px;
 }
 
-.confirmation-dialog {
+.dialog {
   background-color: var(--background-secondary);
   color: var(--text);
   box-shadow: var(--dialog-shadow);
@@ -19,7 +19,7 @@
   width: min(95vw, 500px);
 }
 
-.confirmation-dialog::backdrop {
+.dialog::backdrop {
   /* Using var(--dialog-backdrop) is not working :( */
   background-color: rgba(0, 0, 0, 0.75);
 }

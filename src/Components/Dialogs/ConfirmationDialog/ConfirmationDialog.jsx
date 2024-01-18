@@ -1,10 +1,11 @@
 import React from 'react';
+import '../Dialog.css';
 import './ConfirmationDialog.css';
 
 function ConfirmationDialog({ referrer, title, message, onConfirm, onClose }) {
-  const closeDialog = onClose ? onClose : () => {referrer.current.close()}
+  const closeDialog = onClose ? onClose : () => { referrer.current.close() }
   return (
-    <dialog className="confirmation-dialog" ref={referrer}>
+    <dialog className="dialog confirmation-dialog" ref={referrer}>
       <form method='dialog'>
         <div className='dialog-text'>
           <h5 className='dialog-title'>{title}</h5>
@@ -15,7 +16,7 @@ function ConfirmationDialog({ referrer, title, message, onConfirm, onClose }) {
           <button className='dialog-button confirm-button' onClick={onConfirm}>Confirm</button>
         </div>
       </form>
-    </dialog> 
+    </dialog>
   )
 }
 
