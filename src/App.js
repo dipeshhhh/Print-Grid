@@ -16,9 +16,9 @@ import FilterBAndWIcon from '@mui/icons-material/FilterBAndW';
 import CropIcon from '@mui/icons-material/Crop';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-function EditButtons({ image, setImage, isEditDisabled, inputRef }) {
+function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes }) {
   const cropImageDialogRef = useRef(null);
-  const confirmNewImageDialogRef = React.createRef();
+  const confirmNewImageDialogRef = useRef(null);
   const handleNewImageButton = () => {
     if (image.imageUrl) {
       confirmNewImageDialogRef.current.showModal();
@@ -88,9 +88,11 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef }) {
   )
 }
 
-function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef }) {
+function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef, imageSizes }) {
   const handleCheckboxChange = () => { setIsBordered(!isBordered); }
-  const imageSizeHandle = () => { }
+  const imageSizeHandle = (e) => {
+    console.log(e.target.value);
+  }
   const hiddenFileInputCss = {
     position: 'absolute',
     opacity: '0',
@@ -99,11 +101,19 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef 
     overflow: 'hidden',
     zIndex: '-1',
   }
-
   return (
     <section className='section image-section'>
       <div className='topbar'>
-        <button className='topbar-button topbar-selector' onClick={imageSizeHandle}>Size</button>
+        <select className='topbar-selector' onChange={imageSizeHandle}>
+          <option value={false}>Size</option>
+          {
+            imageSizes.map(imageSize => (
+              <option value={`${imageSize.name}`} key={`${imageSize.name}`}>
+                {imageSize.name}
+              </option>
+            ))
+          }
+        </select>
         {/* For future: adjust custom image size in the topbar itself */}
         <span className='checkbox'>
           <input id='border-check' type='checkbox' checked={isBordered} onChange={handleCheckboxChange} />
@@ -206,14 +216,28 @@ function GenerateImage({ isGenerateDisabled }) {
 }
 
 function App() {
-  // Required variables and constants
-  let currentDPI = 300;
-  const integerRoundingFactor = 2.54 / 2.5; /// Factor to round cm to px conversion, preserving aspect ratio.
-  const cmToPx = (cm) => (((cm * currentDPI) / 2.54) * integerRoundingFactor);
+  // Input Referrer
+  const inputRef = useRef(null);
 
   // Edit buttons and Generate button's state
   const [isGenerateDisabled, setIsGenerateDisabled] = useState(true);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
+
+  // Required variables and constants
+  let currentDPI = 300;
+  const INCH_TO_CM = 2.54;
+  const INTEGER_ROUNDING_FACTOR = 2.54 / 2.5; /// Factor to round cm to px conversion, preserving aspect ratio.
+  const inchToCm = (inch) => (inch * INCH_TO_CM);
+  const cmToPx = (cm) => (((cm * currentDPI) / INCH_TO_CM) * INTEGER_ROUNDING_FACTOR);
+  const inchToPx = (inch) => (cmToPx(inchToCm(inch)));
+
+  const imageSizes = [ // In px
+    {
+      "name": '2x2 inch (Indian passport)',
+      "width": inchToPx(2),
+      "height": inchToPx(2)
+    }
+  ]
 
   // Image
   const [image, setImage] = useState({
@@ -250,20 +274,6 @@ function App() {
       alert('Please select an image file.')
     }
   }
-  const resetImageFilters = () => {
-    setImage({
-      imageUrl: image.imageUrl,
-      brightness: 100,
-      contrast: 100,
-      saturate: 100,
-      hueRotate: 0,
-      grayscale: 0,
-      sepia: 0,
-      rotate: 0,
-      verticalScale: 1,
-      horizontalScale: 1
-    })
-  }
   useEffect(() => {
     if (!image.imageUrl) {
       setIsEditDisabled(true);
@@ -274,9 +284,6 @@ function App() {
     setIsGenerateDisabled(false);
   }, [image])
 
-  // Input Referrer
-  const inputRef = useRef(null);
-
   return (
     <div className='App'>
       <EditButtons
@@ -285,6 +292,7 @@ function App() {
         setImage={setImage}
         isEditDisabled={isEditDisabled}
         inputRef={inputRef}
+        imageSizes={imageSizes}
       />
 
       <ImageSection
@@ -293,6 +301,7 @@ function App() {
         isBordered={isBordered}
         setIsBordered={setIsBordered}
         inputRef={inputRef}
+        imageSizes={imageSizes}
       />
 
       <GenerateImage

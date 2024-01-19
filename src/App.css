@@ -76,6 +76,7 @@
   color: var(--text);
   background-color: var(--background);
   border-radius: var(--topbar-button-radius);
+  max-width: 200px;
   border-width: 0px;
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;

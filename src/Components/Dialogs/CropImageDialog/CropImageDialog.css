@@ -1,0 +1,36 @@
+.crop-dialog {
+  width: clamp(500px, 80vw, 95vw);
+}
+
+.crop-dialog-body {
+  height: calc(100vh - 120px);
+  overflow: hidden;
+  padding: var(--dialog-padding);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crop-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-top-right-radius: var(--container-radius);
+  border-top-left-radius: var(--container-radius);
+}
+
+.crop-image-preview {
+  max-width: 100%;
+  max-height: calc(100vh - 120px - (var(--dialog-padding) * 2));
+  /* transition: all 150ms ease-in-out 0s; */
+  cursor: move;
+
+  position: absolute;
+}
+
+.crop-dialog-buttons{
+  z-index: 1;
+}
