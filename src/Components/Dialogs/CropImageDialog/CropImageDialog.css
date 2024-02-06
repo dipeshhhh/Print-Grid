@@ -1,14 +1,17 @@
 .crop-dialog {
   width: clamp(500px, 80vw, 95vw);
+  touch-action: none;
 }
 
 .crop-dialog-body {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 121px);
   overflow: hidden;
-  padding: var(--dialog-padding);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
+  padding: var(--dialog-padding);
 }
 
 .crop-image-container {
@@ -23,11 +26,12 @@
 }
 
 .crop-image-preview {
-  max-width: 100%;
-  max-height: calc(100vh - 120px - (var(--dialog-padding) * 2));
+  /* max-width: 100%;
+  max-height: calc(100vh - 120px - (var(--dialog-padding) * 2)); */
   /* transition: all 150ms ease-in-out 0s; */
+  min-width: 50px;
+  min-height: 50px;
   cursor: move;
-
   position: absolute;
 }
 

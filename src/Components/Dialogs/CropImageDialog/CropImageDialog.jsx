@@ -1,93 +1,139 @@
-import React, { useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import '../Dialog.css';
 import './CropImageDialog.css';
 
 import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog.jsx';
 
 function CropImageDialog({ referrer, image, setImage }) {
+  // ========== DOM references ==========
+  // References to the image and canvas elements
   const cropImageRef = useRef(null);
   const cropImageParentRef = useRef(null);
   const canvasRef = useRef(null);
   const confirmCropDialogRef = useRef(null);
   const cancelCropDialogRef = useRef(null);
+  // ====================================
+
+  // ========== Crop Cancel/Confirm ==========
+  // Functions to handle the cancel and confirm buttons
   function confirmCropOnConfirm() { referrer.current.close() }
   function confirmCropOnClose() { confirmCropDialogRef.current.close() }
   function cancelCropOnConfirm() { referrer.current.close() }
   function cancelCropOnClose() { cancelCropDialogRef.current.close() }
+  // =========================================
 
+  // ========== Crop Image ==========
+  // Function to crop the image
   const cropImage = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     const newImage = new Image();
     newImage.src = image.imageUrl;
   }
+  // ================================
 
-  // Dragging the image
-  let deviceType = '';
-  let initialX = 0, initialY = 0;
-  const events = {
-    mouse: {
-      down: 'mousedown',
-      move: 'mousemove',
-      up: 'mouseup',
-      out: 'mouseout'
-    },
-    touch: {
-      down: 'touchstart',
-      move: 'touchmove',
-      up: 'touchend',
-      out: 'touchcancel'
-    }
-  }
-  const isTouchDevice = () => {
-    try {
-      document.createEvent('TouchEvent');
-      deviceType = 'touch';
-      return true;
-    }
-    catch (e) {
-      deviceType = 'mouse';
-      return false;
-    }
-  }
-  isTouchDevice();
+  // ========== Initial Values ==========
+  let initialX = 0, initialY = 0; // Initial values for the pointer position
+
+  // ========== Drag Image ==========
   const onDragCropImage = (e) => {
     e.preventDefault();
-    const newX = !isTouchDevice() ? e.clientX : e.touches[0].clientX;
-    const newY = !isTouchDevice() ? e.clientY : e.touches[0].clientY;
+    if (!e.isPrimary) return;
+    const checkBounds = (newValue, parentDimension, selfDimension) => {
+      // Checking if the new value is within the bounds of the parent element
+      // Bounds behave differently for positive and negative values
+      return (newValue > 0 && newValue < parentDimension - 50) ||
+        (newValue < 0 && Math.abs(newValue) < selfDimension - 50);
+    };
+    const newX = e.clientX;
+    const newY = e.clientY;
     const newPosX = cropImageRef.current.offsetLeft - (initialX - newX);
     const newPosY = cropImageRef.current.offsetTop - (initialY - newY);
-    if (Math.abs(newPosY) < parseInt(cropImageRef.current.height) - 50) {
+    if (checkBounds(newPosY, parseInt(cropImageParentRef.current.clientHeight), parseInt(cropImageRef.current.height))) {
       cropImageRef.current.style.top = `${newPosY}px`;
     }
-    if (Math.abs(newPosX) < parseInt(cropImageRef.current.width) - 50) {
+    if (checkBounds(newPosX, parseInt(cropImageParentRef.current.clientWidth), parseInt(cropImageRef.current.width))) {
       cropImageRef.current.style.left = `${newPosX}px`;
     }
     initialX = newX;
     initialY = newY;
   }
+  // ================================
+
+  // ========== Zoom Image ==========
+  const onScrollZoomCropImage = (e) => {
+    e.preventDefault();
+    const newWidth = cropImageRef.current.width + (-e.deltaY * 0.2);
+    const newHeight = (cropImageRef.current.height / cropImageRef.current.width) * newWidth;
+    // const newHeight = originalImageAspectRatio * newWidth;
+    if (newWidth > 50 && newHeight > 50) {
+      cropImageRef.current.style.width = `${newWidth}px`;
+      cropImageRef.current.style.height = `${newHeight}px`;
+    }
+  }
+
   const removeDragEventListeners = () => {
-    window.removeEventListener(events[deviceType].move, onDragCropImage);
-    window.removeEventListener(events[deviceType].up, removeDragEventListeners);
+    // pointersArray.length = 0;
+    // initialDistance = 0;
+    // window.removeEventListener('pointermove', onPinchZoomCropImage);
+    window.removeEventListener('pointermove', onDragCropImage);
+    window.removeEventListener('pointerup', removeDragEventListeners);
   }
+
   if (cropImageRef.current) {
-    cropImageRef.current.addEventListener(events[deviceType].down, (e) => {
+    cropImageRef.current.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      initialX = !isTouchDevice() ? e.clientX : e.touches[0].clientX;
-      initialY = !isTouchDevice() ? e.clientY : e.touches[0].clientY;
-      // Adding event listeners to the window so that the user can drag the image even if the mouse is not over the image
-      window.addEventListener(events[deviceType].move, onDragCropImage);
+
+      initialX = e.clientX;
+      initialY = e.clientY;
+
+      // Adding event listeners to the window so that the user can drag/zoom the image even if the mouse is not over the image
+      window.addEventListener('pointermove', onDragCropImage);
       // Removing event listeners when the user stops dragging the image
-      window.addEventListener(events[deviceType].up, removeDragEventListeners);
+      window.addEventListener('pointerup', removeDragEventListeners);
     });
-    // cropImageRef.current.addEventListener(events[deviceType].) // Will do later
+
+
+    cropImageRef.current.addEventListener('pointerenter', () => {
+      // Adding event listener to the image so that the user can zoom in and out
+      cropImageRef.current.addEventListener('wheel', onScrollZoomCropImage);
+
+      // Removing event listener when the pointer leaves the image
+      cropImageRef.current.addEventListener('pointerleave', () => {
+        cropImageRef.current.removeEventListener('wheel', onScrollZoomCropImage);
+      });
+    });
   }
+  // ====================================
 
   return (
     <dialog className='dialog crop-dialog' ref={referrer}>
       <div className='crop-dialog-body'>
         <div className='crop-image-container' ref={cropImageParentRef}>
-          {image.imageUrl && <img ref={cropImageRef} className='crop-image-preview' src={image.imageUrl} alt='Image to be Cropped' draggable={false} />}
+          {image.imageUrl &&
+            <img
+              ref={cropImageRef}
+              className='crop-image-preview'
+              src={image.imageUrl}
+              alt='Image to be Cropped'
+              draggable={false}
+              style={{
+                transform: `
+                  rotate(${image.rotate}deg)
+                  scale(${image.verticalScale}, ${image.horizontalScale})
+                `,
+                filter: `
+                  brightness(${image.brightness}%)
+                  contrast(${image.contrast}%)
+                  saturate(${image.saturate}%)
+                  grayscale(${image.grayscale})
+                  sepia(${image.sepia}%)
+                  hue-rotate(${image.hueRotate}deg)
+                `,
+              }}
+              width='auto'
+              height='100%'
+            />}
         </div>
       </div>
       <div className='dialog-buttons crop-dialog-buttons'>
