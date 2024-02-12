@@ -1,3 +1,9 @@
+:root {
+  --cropper-resizer-height: 10px;
+  --cropper-resizer-width: 10px;
+  --cropper-resizer-position: -5px;
+}
+
 .crop-dialog {
   width: clamp(500px, 80vw, 95vw);
   touch-action: none;
@@ -10,7 +16,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: relative;
+  /* position: relative; */
   padding: var(--dialog-padding);
 }
 
@@ -35,6 +41,58 @@
   position: absolute;
 }
 
-.crop-dialog-buttons{
+.cropper {
+  max-width: 100%;
+  max-height: 100%;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 2px solid black;
   z-index: 1;
+  cursor: move;
+}
+
+.cropper-resizer {
+  position: absolute;
+  width: var(--cropper-resizer-width);
+  height: var(--cropper-resizer-height);
+  background-color: var(--accent);
+  border: 2px solid black;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.cropper .ne {
+  cursor: ne-resize;
+  top: var(--cropper-resizer-position);
+  right: var(--cropper-resizer-position);
+}
+
+.cropper .nw {
+  cursor: nw-resize;
+  top: var(--cropper-resizer-position);
+  left: var(--cropper-resizer-position);
+}
+
+.cropper .se {
+  cursor: se-resize;
+  bottom: var(--cropper-resizer-position);
+  right: var(--cropper-resizer-position);
+}
+
+.cropper .sw {
+  cursor: sw-resize;
+  bottom: var(--cropper-resizer-position);
+  left: var(--cropper-resizer-position);
+}
+
+.crop-dialog-buttons {
+  z-index: 1;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --cropper-resizer-height: 20px;
+    --cropper-resizer-width: 20px;
+    --cropper-resizer-position: -10px;
+  }
 }

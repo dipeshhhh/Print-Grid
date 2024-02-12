@@ -16,7 +16,7 @@ import FilterBAndWIcon from '@mui/icons-material/FilterBAndW';
 import CropIcon from '@mui/icons-material/Crop';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes }) {
+function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize }) {
   const cropImageDialogRef = useRef(null);
   const confirmNewImageDialogRef = useRef(null);
   const handleNewImageButton = () => {
@@ -83,15 +83,18 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes }) 
         referrer={cropImageDialogRef}
         image={image}
         setImage={setImage}
+        imageSizes={imageSizes}
+        selectedImageSize={selectedImageSize}
+        setSelectedImageSize={setSelectedImageSize}
       />
     </section>
   )
 }
 
-function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef, imageSizes }) {
+function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef, imageSizes, selectedImageSize, setSelectedImageSize}) {
   const handleCheckboxChange = () => { setIsBordered(!isBordered); }
   const imageSizeHandle = (e) => {
-    console.log(e.target.value);
+    setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
   }
   const hiddenFileInputCss = {
     position: 'absolute',
@@ -105,7 +108,7 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef,
     <section className='section image-section'>
       <div className='topbar'>
         <select className='topbar-selector' onChange={imageSizeHandle}>
-          <option value={false}>Size</option>
+          <option value={selectedImageSize.name}>{selectedImageSize.name}</option>
           {
             imageSizes.map(imageSize => (
               <option value={`${imageSize.name}`} key={`${imageSize.name}`}>
@@ -223,6 +226,7 @@ function App() {
   const [isGenerateDisabled, setIsGenerateDisabled] = useState(true);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
 
+
   // Required variables and constants
   let currentDPI = 300;
   const INCH_TO_CM = 2.54;
@@ -231,13 +235,15 @@ function App() {
   const cmToPx = (cm) => (((cm * currentDPI) / INCH_TO_CM) * INTEGER_ROUNDING_FACTOR);
   const inchToPx = (inch) => (cmToPx(inchToCm(inch)));
 
+  // Image sizes
   const imageSizes = [ // In px
     {
       "name": '2x2 inch (Indian passport)',
       "width": inchToPx(2),
-      "height": inchToPx(2)
+      "height": inchToPx(2),
     }
   ]
+  const [selectedImageSize, setSelectedImageSize] = useState(imageSizes[0]);
 
   // Image
   const [image, setImage] = useState({
@@ -293,6 +299,8 @@ function App() {
         isEditDisabled={isEditDisabled}
         inputRef={inputRef}
         imageSizes={imageSizes}
+        selectedImageSize={selectedImageSize}
+        setSelectedImageSize={setSelectedImageSize}
       />
 
       <ImageSection
@@ -302,6 +310,8 @@ function App() {
         setIsBordered={setIsBordered}
         inputRef={inputRef}
         imageSizes={imageSizes}
+        selectedImageSize={selectedImageSize}
+        setSelectedImageSize={setSelectedImageSize}
       />
 
       <GenerateImage
