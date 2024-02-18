@@ -5,7 +5,7 @@ import './CropImageDialog.css';
 import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog.jsx';
 import { IceSkating } from '@mui/icons-material';
 
-function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSelectedImageSize }) {
+function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSelectedImageSize, setIsUserCropping, isUserCropping }) {
   // ========== DOM references ==========
   // References to the image and canvas elements
   const cropImageRef = useRef(null);
@@ -16,19 +16,20 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
   const cancelCropDialogRef = useRef(null);
   // ====================================
 
-  // ========== Crop Cancel/Confirm ==========
-  // Functions to handle the cancel and confirm buttons
-  function confirmCropOnConfirm() { referrer.current.close() }
-  function confirmCropOnClose() { confirmCropDialogRef.current.close() }
-  function cancelCropOnConfirm() { referrer.current.close() }
-  function cancelCropOnClose() { cancelCropDialogRef.current.close() }
-  // =========================================
-
   // ========== Constants/Variables and Initial Values ==========
   const isWindowHorizontal = (window.innerWidth / window.innerHeight) > 1;
   const dialogPadding = Number.parseInt(getComputedStyle(document.body).getPropertyValue('--dialog-padding').slice(0, -2));
   let initialPointerPositionX = 0, initialPointerPositionY = 0; // Initial values for the pointer position
+  let isUserResizingCropper = false; // Variable to check if the user is resizing the cropper
   // ============================================
+
+  // ========== Crop Cancel/Confirm ==========
+  // Functions to handle the cancel and confirm buttons
+  function confirmCropOnConfirm() { referrer.current.close(); setIsUserCropping(false); }
+  function confirmCropOnClose() { confirmCropDialogRef.current.close() }
+  function cancelCropOnConfirm() { referrer.current.close(); setIsUserCropping(false); }
+  function cancelCropOnClose() { cancelCropDialogRef.current.close() }
+  // =========================================
 
   // ========== Crop Image ==========
   // Function to crop the image
@@ -137,6 +138,10 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
   }
   // ================================
 
+  // ========== Cropper Resizing ==========
+
+  // =====================================
+
   // ========== Zoom Image ==========
   const pointersArray = [];
   let initialDistance = 0;
@@ -177,47 +182,83 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
   const removeDragEventListeners = () => {
     pointersArray.length = 0;
     initialDistance = 0;
+    isUserResizingCropper = false;
     window.removeEventListener('pointermove', onPinchZoomCropImage);
     window.removeEventListener('pointermove', onDragCropImage);
     window.removeEventListener('pointermove', onDragCropper);
+    window.removeEventListener('pointermove', onResizeCropper)
 
     window.removeEventListener('pointerup', removeDragEventListeners);
   }
   // ===========================================
 
   // ========== Event Listeners ==========
-  if (cropImageRef.current) {
-    cropImageRef.current.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      initialPointerPositionX = e.clientX;
-      initialPointerPositionY = e.clientY;
-      pointersArray.push(e);
-      // Adding event listeners to the window so that the user can drag/zoom the image even if the mouse is not over the image
-      if (pointersArray.length <= 1) window.addEventListener('pointermove', onDragCropImage);
-      else if (pointersArray.length > 1) {
-        window.removeEventListener('pointermove', onDragCropImage);
-        window.addEventListener('pointermove', onPinchZoomCropImage);
-      }
-      // Removing event listeners when the user stops dragging the image
-      window.addEventListener('pointerup', removeDragEventListeners);
-    });
-    cropImageRef.current.addEventListener('pointerenter', () => {
-      // Adding event listener to the image so that the user can zoom in and out
-      cropImageRef.current.addEventListener('wheel', onScrollZoomCropImage);
-      // Removing event listener when the pointer leaves the image
-      cropImageRef.current.addEventListener('pointerleave', () => {
-        cropImageRef.current.removeEventListener('wheel', onScrollZoomCropImage);
+  useEffect(() => {
+    if (cropImageRef.current) {
+      cropImageRef.current.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        initialPointerPositionX = e.clientX;
+        initialPointerPositionY = e.clientY;
+        pointersArray.push(e);
+        // Adding event listeners to the window so that the user can drag/zoom the image even if the mouse is not over the image
+        if (pointersArray.length <= 1) window.addEventListener('pointermove', onDragCropImage);
+        else if (pointersArray.length > 1) {
+          window.removeEventListener('pointermove', onDragCropImage);
+          window.addEventListener('pointermove', onPinchZoomCropImage);
+        }
+        // Removing event listeners when the user stops dragging the image
+        window.addEventListener('pointerup', removeDragEventListeners);
       });
-    });
-  }
-  if (cropperRef.current) {
-    cropperRef.current.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      initialPointerPositionX = e.clientX;
-      initialPointerPositionY = e.clientY;
-      window.addEventListener('pointermove', onDragCropper);
-      window.addEventListener('pointerup', removeDragEventListeners);
-    })
+      cropImageRef.current.addEventListener('pointerenter', () => {
+        // Adding event listener to the image so that the user can zoom in and out
+        cropImageRef.current.addEventListener('wheel', onScrollZoomCropImage);
+        // Removing event listener when the pointer leaves the image
+        cropImageRef.current.addEventListener('pointerleave', () => {
+          cropImageRef.current.removeEventListener('wheel', onScrollZoomCropImage);
+        });
+      });
+    }
+    if (cropperRef.current) {
+      cropperRef.current.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (e.target.classList.contains('cropper-resizer')) isUserResizingCropper = true;
+
+        initialPointerPositionX = e.clientX;
+        initialPointerPositionY = e.clientY;
+
+        // window.addEventListener('pointermove', onDragCropper);
+        if (!isUserResizingCropper) window.addEventListener('pointermove', onDragCropper);
+        else window.addEventListener('pointermove', onResizeCropper);
+
+        window.addEventListener('pointerup', removeDragEventListeners);
+      })
+    }
+  }, [isUserCropping]);
+
+
+  const onResizeCropper = (e) => {
+    e.preventDefault();
+    if (!e.isPrimary) return;
+
+    const isImageHorizontal = (cropImageRef.current.clientWidth / cropImageRef.current.clientHeight) > (selectedImageSize.width / selectedImageSize.height);
+    const checkBounds = () => {
+
+    }
+
+    const currentPointerPositionX = e.clientX;
+    const currentPointerPositionY = e.clientY;
+    const dx = -(initialPointerPositionX - currentPointerPositionX);
+    const dy = -(initialPointerPositionY - currentPointerPositionY);
+    // const hypothenuse = Math.hypot(dx, dy);
+
+    //! Work In Progress
+    if (e.target.classList.contains('se')) {
+      if (isImageHorizontal) {
+
+      }
+    }
+    initialPointerPositionX = currentPointerPositionX;
+    initialPointerPositionY = currentPointerPositionY;
   }
   // ====================================
 
@@ -225,7 +266,7 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
     <dialog className='dialog crop-dialog' ref={referrer}>
       <div className='crop-dialog-body'>
         <div className='crop-image-container' ref={cropImageContainerRef}>
-          {image.imageUrl &&
+          {(isUserCropping && image.imageUrl) &&
             <>
               <img
                 ref={cropImageRef}
@@ -247,24 +288,28 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
                   hue-rotate(${image.hueRotate}deg)
                 `,
                 }}
-                width='auto'
-                height='100%'
+                width={(cropImageContainerRef.current.clientWidth / cropImageContainerRef.current.clientHeight) > (image.naturalWidth / image.naturalHeight) ? 'auto' : '100%'}
+                height={(cropImageContainerRef.current.clientWidth / cropImageContainerRef.current.clientHeight) > (image.naturalWidth / image.naturalHeight) ? '100%' : 'auto'}
               />
+              {/* {cropImageRef.current && */}
               <div
                 ref={cropperRef}
                 draggable={false}
                 className='cropper'
                 style={{
-                  height: isWindowHorizontal ? '50px' : 'auto',
-                  width: isWindowHorizontal ? 'auto' : '50px',
                   aspectRatio: `${selectedImageSize.width} / ${selectedImageSize.height}`,
+                  // height: (cropImageRef.current.clientWidth / cropImageRef.current.clientHeight) > (selectedImageSize.width / selectedImageSize.height) ? `${cropImageRef.current.height}px` : 'auto',
+                  // width: (cropImageRef.current.clientWidth / cropImageRef.current.clientHeight) > (selectedImageSize.width / selectedImageSize.height) ? 'auto' : `${cropImageRef.current.width}px`,
+                  height: '50px',
+                  width: '50px',
                 }}
               >
-                <div className='ne cropper-resizer' />
-                <div className='nw cropper-resizer' />
-                <div className='se cropper-resizer' />
-                <div className='sw cropper-resizer' />
+                <div className='cropper-resizer ne' />
+                <div className='cropper-resizer nw' />
+                <div className='cropper-resizer se' />
+                <div className='cropper-resizer sw' />
               </div>
+              {/* } */}
             </>
           }
           {/* {cropImageRef.current &&

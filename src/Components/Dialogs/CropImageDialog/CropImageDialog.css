@@ -44,6 +44,8 @@
 .cropper {
   max-width: 100%;
   max-height: 100%;
+  min-width: 50px;
+  min-height: 50px;
   position: absolute;
   background-color: rgba(0, 0, 0, 0.2);
   border: 2px solid black;
@@ -61,25 +63,25 @@
   z-index: 2;
 }
 
-.cropper .ne {
+.cropper-resizer.ne {
   cursor: ne-resize;
   top: var(--cropper-resizer-position);
   right: var(--cropper-resizer-position);
 }
 
-.cropper .nw {
+.cropper-resizer.nw {
   cursor: nw-resize;
   top: var(--cropper-resizer-position);
   left: var(--cropper-resizer-position);
 }
 
-.cropper .se {
+.cropper-resizer.se {
   cursor: se-resize;
   bottom: var(--cropper-resizer-position);
   right: var(--cropper-resizer-position);
 }
 
-.cropper .sw {
+.cropper-resizer.sw {
   cursor: sw-resize;
   bottom: var(--cropper-resizer-position);
   left: var(--cropper-resizer-position);

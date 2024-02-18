@@ -16,7 +16,7 @@ import FilterBAndWIcon from '@mui/icons-material/FilterBAndW';
 import CropIcon from '@mui/icons-material/Crop';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize }) {
+function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize, isUserCropping, setIsUserCropping }) {
   const cropImageDialogRef = useRef(null);
   const confirmNewImageDialogRef = useRef(null);
   const handleNewImageButton = () => {
@@ -33,7 +33,7 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
   const rotateClockwise = () => { setImage({ ...image, rotate: image.rotate + 90 }) }
   const rotateAntiClockwise = () => { setImage({ ...image, rotate: image.rotate - 90 }) }
   const grayscale = () => { setImage({ ...image, grayscale: image.grayscale === 1 ? 0 : 1 }) }
-  const crop = () => { cropImageDialogRef.current.showModal() }
+  const crop = () => { cropImageDialogRef.current.showModal(); setIsUserCropping(true); }
   const reset = () => {
     setImage({
       imageUrl: image.imageUrl,
@@ -86,6 +86,8 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
         imageSizes={imageSizes}
         selectedImageSize={selectedImageSize}
         setSelectedImageSize={setSelectedImageSize}
+        isUserCropping={isUserCropping}
+        setIsUserCropping={setIsUserCropping}
       />
     </section>
   )
@@ -225,6 +227,7 @@ function App() {
   // Edit buttons and Generate button's state
   const [isGenerateDisabled, setIsGenerateDisabled] = useState(true);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
+  const [isUserCropping, setIsUserCropping] = useState(false);
 
 
   // Required variables and constants
@@ -256,24 +259,32 @@ function App() {
     sepia: 0,
     rotate: 0,
     verticalScale: 1,
-    horizontalScale: 1
+    horizontalScale: 1,
+    naturalHeight: false,
+    naturalWidth: false
   });
   const [isBordered, setIsBordered] = useState(false);
   const uploadImage = (e) => {
     if (e.target.files && (e.target.files.length > 0) && e.target.files[0].type.startsWith('image/')) {
       const imageUrl = URL.createObjectURL(e.target.files[0]);
-      setImage({
-        imageUrl: imageUrl,
-        brightness: 100,
-        contrast: 100,
-        saturate: 100,
-        hueRotate: 0,
-        grayscale: 0,
-        sepia: 0,
-        rotate: 0,
-        verticalScale: 1,
-        horizontalScale: 1
-      })
+      const img = new Image();
+      img.src = imageUrl;
+      img.onload = () => {
+        setImage({
+          imageUrl: imageUrl,
+          brightness: 100,
+          contrast: 100,
+          saturate: 100,
+          hueRotate: 0,
+          grayscale: 0,
+          sepia: 0,
+          rotate: 0,
+          verticalScale: 1,
+          horizontalScale: 1,
+          naturalHeight: img.naturalHeight,
+          naturalWidth: img.naturalWidth
+        })
+      }
       // URL.revokeObjectURL(imageUrl) // Free memory
     }
     else {
@@ -301,6 +312,8 @@ function App() {
         imageSizes={imageSizes}
         selectedImageSize={selectedImageSize}
         setSelectedImageSize={setSelectedImageSize}
+        isUserCropping={isUserCropping}
+        setIsUserCropping={setIsUserCropping}
       />
 
       <ImageSection
