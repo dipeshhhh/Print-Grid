@@ -1,9 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import '../Dialog.css';
 import './CropImageDialog.css';
 
 import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog.jsx';
-import { IceSkating } from '@mui/icons-material';
+
+// ! Known Bugs
+// 1. Cropper goes a little out of bounds on the bottom-right side
+// 2. There is 2-3px gap inside between the cropper and the image on top-left sides, and outside on the bottom-right sides
+
+// ! To-do
+// 1. Fix hard-coded values (somewhere in the cropImageParent height element I think)
+// 2. Fix the known bugs
+// 3. Ability to change selected image size
+// 4. Ability to rotate the image
+// 5. Cropper eye level and face level guides
+// ...
+// n. Finally crop the image
 
 function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSelectedImageSize, setIsUserCropping, isUserCropping }) {
   // ========== DOM references ==========
@@ -11,17 +23,20 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
   const cropImageRef = useRef(null);
   const cropImageContainerRef = useRef(null);
   const cropperRef = useRef(null);
-  const canvasRef = useRef(null);
+  // const canvasRef = useRef(null);
   const confirmCropDialogRef = useRef(null);
   const cancelCropDialogRef = useRef(null);
-  // ====================================
 
   // ========== Constants/Variables and Initial Values ==========
-  const isWindowHorizontal = (window.innerWidth / window.innerHeight) > 1;
-  const dialogPadding = Number.parseInt(getComputedStyle(document.body).getPropertyValue('--dialog-padding').slice(0, -2));
-  let initialPointerPositionX = 0, initialPointerPositionY = 0; // Initial values for the pointer position
-  let isUserResizingCropper = false; // Variable to check if the user is resizing the cropper
-  // ============================================
+  const pointersArray = [];
+  const initialPointerPositionX = useRef(0);
+  const initialPointerPositionY = useRef(0);
+  const isUserResizingCropper = useRef(false);
+  const cropperResizerPosition = useRef(null);
+  // const isWindowHorizontal = (window.innerWidth / window.innerHeight) > 1;
+  // const dialogPadding = Number.parseInt(getComputedStyle(document.body).getPropertyValue('--dialog-padding').slice(0, -2));
+  // const originalImageAspectRatio = cropImageRef.current ? cropImageRef.current.width / cropImageRef.current.height : 'auto';
+  let initialDistance = 0;
 
   // ========== Crop Cancel/Confirm ==========
   // Functions to handle the cancel and confirm buttons
@@ -29,17 +44,15 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
   function confirmCropOnClose() { confirmCropDialogRef.current.close() }
   function cancelCropOnConfirm() { referrer.current.close(); setIsUserCropping(false); }
   function cancelCropOnClose() { cancelCropDialogRef.current.close() }
-  // =========================================
 
   // ========== Crop Image ==========
   // Function to crop the image
-  const cropImage = () => {
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-    const newImage = new Image();
-    newImage.src = image.imageUrl;
-  }
-  // ================================
+  // const cropImage = () => {
+  //   const canvas = canvasRef.current;
+  //   const context = canvas.getContext('2d');
+  //   const newImage = new Image();
+  //   newImage.src = image.imageUrl;
+  // }
 
   // ========== Drag Image ==========
   const onDragCropImage = (e) => {
@@ -62,8 +75,8 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
     const currentPointerPositionX = e.clientX;
     const currentPointerPositionY = e.clientY;
     // Change
-    const dx = -(initialPointerPositionX - currentPointerPositionX);
-    const dy = -(initialPointerPositionY - currentPointerPositionY);
+    const dx = -(initialPointerPositionX.current - currentPointerPositionX);
+    const dy = -(initialPointerPositionY.current - currentPointerPositionY);
     // Moving relative to mouse position on image's top left corner
     // const newPosX = (currentPointerPositionX - (window.innerWidth - (referrer.current.clientWidth - (dialogPadding*2)))/2);
     // const newPosY = (currentPointerPositionY - (window.innerHeight - (referrer.current.clientHeight - (dialogPadding*2)))/2);
@@ -91,8 +104,8 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
     )) {
       cropImageRef.current.style.left = `${newPosX}px`;
     }
-    initialPointerPositionX = currentPointerPositionX; // Else it will add 1+2+3+4+5+6, with this it will add 1+1+1+1+1+1
-    initialPointerPositionY = currentPointerPositionY;
+    initialPointerPositionX.current = currentPointerPositionX; // Else it will add 1+2+3+4+5+6, with this it will add 1+1+1+1+1+1
+    initialPointerPositionY.current = currentPointerPositionY;
   }
   const onDragCropper = (e) => {
     // Known bug: There is 2-3px gap inside between the cropper and the image on top-left sides, and outside on the bottom-right sides
@@ -111,8 +124,8 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
     };
     const currentPointerPositionX = e.clientX;
     const currentPointerPositionY = e.clientY;
-    const dx = -(initialPointerPositionX - currentPointerPositionX);
-    const dy = -(initialPointerPositionY - currentPointerPositionY);
+    const dx = -(initialPointerPositionX.current - currentPointerPositionX);
+    const dy = -(initialPointerPositionY.current - currentPointerPositionY);
     const newPosX = cropperRef.current.offsetLeft + (dx);
     const newPosY = cropperRef.current.offsetTop + (dy);
     if (checkBounds(
@@ -133,20 +146,106 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
     )) {
       cropperRef.current.style.top = `${newPosY}px`;
     }
-    initialPointerPositionX = currentPointerPositionX;
-    initialPointerPositionY = currentPointerPositionY;
+    initialPointerPositionX.current = currentPointerPositionX;
+    initialPointerPositionY.current = currentPointerPositionY;
   }
-  // ================================
 
   // ========== Cropper Resizing ==========
+  const onResizeCropper = (e) => {
+    e.preventDefault();
+    if (!e.isPrimary) return;
 
-  // =====================================
+    const rect = cropperRef.current.getBoundingClientRect();
+    // const isImageHorizontal = (cropImageRef.current.clientWidth / cropImageRef.current.clientHeight) > (selectedImageSize.width / selectedImageSize.height);
+    const checkBounds = (
+      newPosX,
+      newPosY,
+      newHeight,
+      newWidth,
+      selfElement,
+      parentElement,
+      anchoredElement,
+      selectedImageSize,
+    ) => {
+      // Known bug: cropper goes a little out of bounds on the bottom-right side
+      return (
+        (newHeight < parentElement.clientHeight)
+        &&
+        (newWidth < parentElement.clientWidth)
+        &&
+        (newWidth < anchoredElement.clientHeight)
+        &&
+        (newWidth < anchoredElement.clientWidth)
+        &&
+        (newHeight > 50)
+        &&
+        (newWidth > ((selectedImageSize.width / selectedImageSize.height) * 50))
+        &&
+        ((newPosX > 0 && newPosX < (parentElement.clientWidth - (selfElement.clientWidth))) || (newPosX < 0 && Math.abs(newPosX) < selfElement.clientWidth - selfElement.clientWidth))
+        &&
+        ((newPosY > 0 && newPosY < parentElement.clientHeight - selfElement.clientHeight) || (newPosY < 0 && Math.abs(newPosY) < selfElement.clientHeight - selfElement.clientHeight))
+        &&
+        (newPosX > anchoredElement.offsetLeft)
+        &&
+        (newPosY > anchoredElement.offsetTop)
+        &&
+        (newPosX < ((anchoredElement.offsetLeft + anchoredElement.clientWidth) - selfElement.clientWidth))
+        &&
+        (newPosY < ((anchoredElement.offsetTop + anchoredElement.clientHeight) - selfElement.clientHeight))
+      );
+    }
+
+    const currentPointerPositionX = e.clientX;
+    const currentPointerPositionY = e.clientY;
+    const dx = -(initialPointerPositionX.current - currentPointerPositionX);
+    const dy = -(initialPointerPositionY.current - currentPointerPositionY);
+    const hypotenuse = Math.hypot(dx, dy);
+    let newWidth, newHeight;
+    let newPosX = cropperRef.current.offsetLeft;
+    let newPosY = cropperRef.current.offsetTop;
+
+    if (cropperResizerPosition.current === 'se') {
+      newWidth = rect.width + (Math.sign(dx) * hypotenuse);
+      newHeight = (rect.height / rect.width) * newWidth;
+    }
+    else if (cropperResizerPosition.current === 'ne') {
+      newHeight = rect.height - (Math.sign(dy) * hypotenuse);
+      newWidth = (rect.width / rect.height) * newHeight;
+      newPosY = cropperRef.current.offsetTop + (Math.sign(dy) * hypotenuse);
+    }
+    else if (cropperResizerPosition.current === 'sw') {
+      newWidth = rect.width - (Math.sign(dx) * hypotenuse);
+      newHeight = (rect.height / rect.width) * newWidth;
+      newPosX = cropperRef.current.offsetLeft + (Math.sign(dx) * hypotenuse);
+    }
+    else if (cropperResizerPosition.current === 'nw') {
+      newWidth = rect.width - (Math.sign(dx) * hypotenuse);
+      newHeight = (rect.height / rect.width) * newWidth;
+      newPosX = cropperRef.current.offsetLeft + (Math.sign(dx) * hypotenuse);
+      newPosY = cropperRef.current.offsetTop + (Math.sign(dy) * hypotenuse);
+    }
+
+    if (checkBounds(
+      newPosX,
+      newPosY,
+      newHeight,
+      newWidth,
+      cropperRef.current,
+      cropImageContainerRef.current,
+      cropImageRef.current,
+      selectedImageSize,
+    )) {
+      cropperRef.current.style.width = `${newWidth}px`;
+      cropperRef.current.style.height = `${newHeight}px`;
+      cropperRef.current.style.left = `${newPosX}px`;
+      cropperRef.current.style.top = `${newPosY}px`;
+    }
+
+    initialPointerPositionX.current = currentPointerPositionX;
+    initialPointerPositionY.current = currentPointerPositionY;
+  }
 
   // ========== Zoom Image ==========
-  const pointersArray = [];
-  let initialDistance = 0;
-  const originalImageAspectRatio = cropImageRef.current ? cropImageRef.current.width / cropImageRef.current.height : 'auto';
-
   const onScrollZoomCropImage = (e) => {
     e.preventDefault();
     const newWidth = cropImageRef.current.width + (-e.deltaY * 0.2);
@@ -176,13 +275,12 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
     }
     initialDistance = distance;
   }
-  // ====================================
 
   // ========== Remove Event Listeners ==========
   const removeDragEventListeners = () => {
     pointersArray.length = 0;
     initialDistance = 0;
-    isUserResizingCropper = false;
+    isUserResizingCropper.current = false;
     window.removeEventListener('pointermove', onPinchZoomCropImage);
     window.removeEventListener('pointermove', onDragCropImage);
     window.removeEventListener('pointermove', onDragCropper);
@@ -190,15 +288,14 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
 
     window.removeEventListener('pointerup', removeDragEventListeners);
   }
-  // ===========================================
 
   // ========== Event Listeners ==========
   useEffect(() => {
     if (cropImageRef.current) {
       cropImageRef.current.addEventListener('pointerdown', (e) => {
         e.preventDefault();
-        initialPointerPositionX = e.clientX;
-        initialPointerPositionY = e.clientY;
+        initialPointerPositionX.current = e.clientX;
+        initialPointerPositionY.current = e.clientY;
         pointersArray.push(e);
         // Adding event listeners to the window so that the user can drag/zoom the image even if the mouse is not over the image
         if (pointersArray.length <= 1) window.addEventListener('pointermove', onDragCropImage);
@@ -221,46 +318,27 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
     if (cropperRef.current) {
       cropperRef.current.addEventListener('pointerdown', (e) => {
         e.preventDefault();
-        if (e.target.classList.contains('cropper-resizer')) isUserResizingCropper = true;
+        if (e.target.classList.contains('cropper-resizer')) {
+          isUserResizingCropper.current = true;
+          cropperResizerPosition.current = [...e.target.classList].find((className) => ['ne', 'nw', 'se', 'sw'].includes(className));
+        }
 
-        initialPointerPositionX = e.clientX;
-        initialPointerPositionY = e.clientY;
+        initialPointerPositionX.current = e.clientX;
+        initialPointerPositionY.current = e.clientY;
 
         // window.addEventListener('pointermove', onDragCropper);
-        if (!isUserResizingCropper) window.addEventListener('pointermove', onDragCropper);
+        if (!isUserResizingCropper.current) window.addEventListener('pointermove', onDragCropper);
         else window.addEventListener('pointermove', onResizeCropper);
 
         window.addEventListener('pointerup', removeDragEventListeners);
       })
     }
+  // Since the event listeners are added and removed in this useEffect, eslint is giving a warning
+  // And onPinchZoomCropImage, onResizeCropper, removeDragEventListeners are not changing throughout the component lifecycle so they are not added to the dependency array
+  // But pointersArray might change yet it is not added to the dependency array because it is being emptied at the end of the event listener
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isUserCropping]);
-
-
-  const onResizeCropper = (e) => {
-    e.preventDefault();
-    if (!e.isPrimary) return;
-
-    const isImageHorizontal = (cropImageRef.current.clientWidth / cropImageRef.current.clientHeight) > (selectedImageSize.width / selectedImageSize.height);
-    const checkBounds = () => {
-
-    }
-
-    const currentPointerPositionX = e.clientX;
-    const currentPointerPositionY = e.clientY;
-    const dx = -(initialPointerPositionX - currentPointerPositionX);
-    const dy = -(initialPointerPositionY - currentPointerPositionY);
-    // const hypothenuse = Math.hypot(dx, dy);
-
-    //! Work In Progress
-    if (e.target.classList.contains('se')) {
-      if (isImageHorizontal) {
-
-      }
-    }
-    initialPointerPositionX = currentPointerPositionX;
-    initialPointerPositionY = currentPointerPositionY;
-  }
-  // ====================================
 
   return (
     <dialog className='dialog crop-dialog' ref={referrer}>
@@ -272,7 +350,7 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
                 ref={cropImageRef}
                 className='crop-image-preview'
                 src={image.imageUrl}
-                alt='Image to be Cropped'
+                alt='To be Cropped'
                 draggable={false}
                 style={{
                   transform: `
@@ -291,7 +369,6 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
                 width={(cropImageContainerRef.current.clientWidth / cropImageContainerRef.current.clientHeight) > (image.naturalWidth / image.naturalHeight) ? 'auto' : '100%'}
                 height={(cropImageContainerRef.current.clientWidth / cropImageContainerRef.current.clientHeight) > (image.naturalWidth / image.naturalHeight) ? '100%' : 'auto'}
               />
-              {/* {cropImageRef.current && */}
               <div
                 ref={cropperRef}
                 draggable={false}
@@ -300,8 +377,12 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
                   aspectRatio: `${selectedImageSize.width} / ${selectedImageSize.height}`,
                   // height: (cropImageRef.current.clientWidth / cropImageRef.current.clientHeight) > (selectedImageSize.width / selectedImageSize.height) ? `${cropImageRef.current.height}px` : 'auto',
                   // width: (cropImageRef.current.clientWidth / cropImageRef.current.clientHeight) > (selectedImageSize.width / selectedImageSize.height) ? 'auto' : `${cropImageRef.current.width}px`,
-                  height: '50px',
-                  width: '50px',
+                  // height: '50px',
+                  // width: '50px',
+                  height: '51px',
+                  width: `${(selectedImageSize.width / selectedImageSize.height) * 51}px`,
+                  minHeight: '50px',
+                  minWidth: `${(selectedImageSize.width / selectedImageSize.height) * 50}px`,
                 }}
               >
                 <div className='cropper-resizer ne' />
@@ -309,26 +390,8 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
                 <div className='cropper-resizer se' />
                 <div className='cropper-resizer sw' />
               </div>
-              {/* } */}
             </>
           }
-          {/* {cropImageRef.current &&
-            <div
-              ref={cropperRef}
-              draggable={false}
-              className='cropper'
-              style={{
-                height: isWindowHorizontal ? '50px' : 'auto',
-                width: isWindowHorizontal ? 'auto' : '50px',
-                aspectRatio: `${selectedImageSize.width} / ${selectedImageSize.height}`,
-              }}
-            >
-              <div className='ne cropper-resizer' />
-              <div className='nw cropper-resizer' />
-              <div className='se cropper-resizer' />
-              <div className='sw cropper-resizer' />
-            </div>
-          } */}
         </div>
       </div>
       <div className='dialog-buttons crop-dialog-buttons'>
