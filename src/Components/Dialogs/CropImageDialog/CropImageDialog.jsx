@@ -17,7 +17,10 @@ import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog.jsx';
 // ...
 // n. Finally crop the image
 
-function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSelectedImageSize, setIsUserCropping, isUserCropping }) {
+function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSelectedImageSize, setIsUserCropping, isUserCropping, imageSizes }) {
+  const imageSizeHandle = (e) => {
+    setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
+  }
   // ========== DOM references ==========
   // References to the image and canvas elements
   const cropImageRef = useRef(null);
@@ -40,19 +43,49 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
 
   // ========== Crop Cancel/Confirm ==========
   // Functions to handle the cancel and confirm buttons
-  function confirmCropOnConfirm() { referrer.current.close(); setIsUserCropping(false); }
+  function confirmCropOnConfirm() { cropImage(); referrer.current.close(); setIsUserCropping(false); }
   function confirmCropOnClose() { confirmCropDialogRef.current.close() }
   function cancelCropOnConfirm() { referrer.current.close(); setIsUserCropping(false); }
   function cancelCropOnClose() { cancelCropDialogRef.current.close() }
 
   // ========== Crop Image ==========
   // Function to crop the image
-  // const cropImage = () => {
-  //   const canvas = canvasRef.current;
-  //   const context = canvas.getContext('2d');
-  //   const newImage = new Image();
-  //   newImage.src = image.imageUrl;
-  // }
+  const cropImage = () => {
+    const cropperInfo = {
+      top: cropperRef.current.offsetTop,
+      left: cropperRef.current.offsetLeft,
+      width: cropperRef.current.clientWidth,
+      height: cropperRef.current.clientHeight,
+    };
+    const imageInfo = {
+      top: cropImageRef.current.offsetTop,
+      left: cropImageRef.current.offsetLeft,
+      width: cropImageRef.current.width,
+      height: cropImageRef.current.height,
+    };
+    const newImage = new Image();
+    newImage.src = image.imageUrl;
+    newImage.onload = () => {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.width = selectedImageSize.width;
+      canvas.height = selectedImageSize.height;
+      context.drawImage(
+        newImage,
+        (cropperInfo.left - imageInfo.left) / (imageInfo.width / newImage.width),
+        (cropperInfo.top - imageInfo.top) / (imageInfo.height / newImage.height),
+        cropperInfo.width / (imageInfo.width / newImage.width),
+        cropperInfo.height / (imageInfo.height / newImage.height),
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+      // setImage({ ...image, imageUrl: canvas.toDataURL('image/png') });
+      setImage({ ...image, imageUrl: canvas.toDataURL('image/png') });
+      setIsUserCropping(false);
+    }
+  }
 
   // ========== Drag Image ==========
   const onDragCropImage = (e) => {
@@ -333,16 +366,31 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
         window.addEventListener('pointerup', removeDragEventListeners);
       })
     }
-  // Since the event listeners are added and removed in this useEffect, eslint is giving a warning
-  // And onPinchZoomCropImage, onResizeCropper, removeDragEventListeners are not changing throughout the component lifecycle so they are not added to the dependency array
-  // But pointersArray might change yet it is not added to the dependency array because it is being emptied at the end of the event listener
+    // Since the event listeners are added and removed in this useEffect, eslint is giving a warning
+    // And onPinchZoomCropImage, onResizeCropper, removeDragEventListeners are not changing throughout the component lifecycle so they are not added to the dependency array
+    // But pointersArray might change yet it is not added to the dependency array because it is being emptied at the end of the event listener
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isUserCropping]);
 
   return (
     <dialog className='dialog crop-dialog' ref={referrer}>
       <div className='crop-dialog-body'>
+        {/* <div className='crop-image-controls'>
+          <div className='crop-image-control image-size-selector-container'>
+            <label htmlFor='crop-dialog-image-size-selector' className='image-size-label'>Image Size:</label>
+            <select className='image-size-selector' onChange={imageSizeHandle} id='crop-dialog-image-size-selector'>
+              <option value={selectedImageSize.name}>{selectedImageSize.name}</option>
+              {
+                imageSizes.map(imageSize => (
+                  <option value={`${imageSize.name}`} key={`${imageSize.name}`}>
+                    {imageSize.name}
+                  </option>
+                ))
+              }
+            </select>
+          </div>
+        </div> */}
         <div className='crop-image-container' ref={cropImageContainerRef}>
           {(isUserCropping && image.imageUrl) &&
             <>

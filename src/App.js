@@ -244,6 +244,11 @@ function App() {
       "name": '2x2 inch (Indian passport)',
       "width": inchToPx(2),
       "height": inchToPx(2),
+    },
+    {
+      "name": '3.5cm x 4.5cm',
+      "width": cmToPx(3.5),
+      "height": cmToPx(4.5),
     }
   ]
   const [selectedImageSize, setSelectedImageSize] = useState(imageSizes[0]);

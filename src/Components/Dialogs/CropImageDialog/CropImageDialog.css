@@ -17,7 +17,6 @@
   align-items: center;
   justify-content: center;
   /* position: relative; */
-  padding: var(--dialog-padding);
 }
 
 .crop-image-container {
@@ -29,6 +28,7 @@
   height: 100%;
   border-top-right-radius: var(--container-radius);
   border-top-left-radius: var(--container-radius);
+  margin: var(--dialog-padding);
 }
 
 .crop-image-preview {
@@ -89,6 +89,36 @@
   cursor: sw-resize;
   bottom: var(--cropper-resizer-position);
   left: var(--cropper-resizer-position);
+}
+
+.crop-image-controls {
+  z-index: 1;
+}
+
+.crop-image-control {
+  background-color: var(--background-secondary);
+  border-radius: var(--topbar-button-radius);
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
+  border-width: 0px;
+  padding: 0.5ch 1ch;
+  padding-top: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.image-size-selector {
+  color: var(--text);
+  background-color: var(--background);
+  border-radius: var(--topbar-button-radius);
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
+  border-width: 0px;
+  max-width: 200px;
+  cursor: pointer;
+  padding: 0.25rem;
 }
 
 .crop-dialog-buttons {

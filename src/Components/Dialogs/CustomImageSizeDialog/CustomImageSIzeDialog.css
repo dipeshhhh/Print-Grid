@@ -1,0 +1,15 @@
+.custom-image-size-dialog {
+  padding: var(--container-padding);
+}
+
+.custom-image-size-inputs {
+  display: flex;
+  direction: column;
+  gap: var(--app-gap);
+}
+
+.custom-image-size-inputs {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
