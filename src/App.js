@@ -93,7 +93,7 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
   )
 }
 
-function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef, imageSizes, selectedImageSize, setSelectedImageSize}) {
+function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef, imageSizes, selectedImageSize, setSelectedImageSize }) {
   const handleCheckboxChange = () => { setIsBordered(!isBordered); }
   const imageSizeHandle = (e) => {
     setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
@@ -165,54 +165,102 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef,
   )
 }
 
-function GenerateImage({ isGenerateDisabled }) {
+function GenerateImage({ isGenerateDisabled, cmToPx, sheetSizes, selectedSheetSize, setSelectedSheetSize, image, selectedImageSize }) {
   const [resultImage, setResultImage] = useState(null);
   const [isDownloadDisabled, setIsDownloadDisabled] = useState(true);
+  const [isResultLoading, setIsResultLoading] = useState(false);
 
   const generateResultImage = () => {
-    let imageGeneratedSuccessfully = true //! Currently set true for testing
-    if (imageGeneratedSuccessfully) {
-      // Handling download button state upon successful result image generation
+    if (!image.imageUrl) return;
+    setIsResultLoading(true);
+    const columnGap = 3; // Gap between images in a column (px)
+    const rowGap = 30; // Gap between images in a row (px)
+    const noOfColumns = Math.floor(selectedSheetSize.width / (selectedImageSize.width + (columnGap * 2)));
+    const noOfRows = Math.floor(selectedSheetSize.height / (selectedImageSize.height + rowGap));
+
+    const resultImageCanvas = document.createElement('canvas');
+    const resultImageCtx = resultImageCanvas.getContext('2d');
+    resultImageCanvas.width = selectedSheetSize.width;
+    resultImageCanvas.height = selectedSheetSize.height;
+    resultImageCtx.fillStyle = 'white';
+    resultImageCtx.fillRect(0, 0, resultImageCanvas.width, resultImageCanvas.height);
+
+    const inputImage = new Image();
+    inputImage.onload = () => {
+      // Adjust and center the image to fit the selected image size
+      const inputImageCanvas = document.createElement('canvas');
+      const inputImageCtx = inputImageCanvas.getContext('2d');
+      let newWidth, newHeight, x, y;
+
+      newWidth = selectedImageSize.width;
+      newHeight = (inputImage.naturalHeight / inputImage.naturalWidth) * selectedImageSize.width;
+      x = 0;
+      y = -((newHeight / 2) - (selectedImageSize.height / 2));
+      if (newHeight < selectedImageSize.height) {
+        newWidth = (inputImage.naturalWidth / inputImage.naturalHeight) * selectedImageSize.height;
+        newHeight = selectedImageSize.height;
+        x = -((newWidth / 2) - (selectedImageSize.width / 2));
+        y = 0;
+      }
+
+      inputImageCanvas.width = selectedImageSize.width;
+      inputImageCanvas.height = selectedImageSize.height;
+      inputImageCtx.drawImage(inputImage, x, y, newWidth, newHeight);
+      
+      // Draw the input image on the result canvas
+      for (let i = 0; i < noOfColumns; i++) {
+        for (let j = 0; j < noOfRows; j++) {
+          resultImageCtx.drawImage(
+            inputImageCanvas,
+            (i * (selectedImageSize.width + columnGap)) + (columnGap * (i + 1)),
+            (j * (selectedImageSize.height + rowGap)) + rowGap,
+            selectedImageSize.width,
+            selectedImageSize.height
+          );
+        }
+      }
+      setResultImage(resultImageCanvas.toDataURL('image/png'));
       setIsDownloadDisabled(false);
+      setIsResultLoading(false);
     }
-  }
+    inputImage.src = image.imageUrl;
+  }  
   const downloadImage = () => {
+    if (!resultImage) return;
+    const link = document.createElement('a');
+    link.href = resultImage;
+    link.download = 'result.png';
+    link.click();
+  }
+  const handleSizeChange = (e) => {
+    setSelectedSheetSize(sheetSizes.find(sheetSize => sheetSize.name === e.target.value));
   }
   const createCustomSize = () => {
   }
-  const handleSizeChange = () => {
-  }
-  const sizeOptions = [
-    {
-      "name": "A4",
-      "widthInCM": "",
-      "heightInCM": ""
-    },
-    {
-      "name": "A3",
-      "widthInCM": "",
-      "heightInCM": ""
-    }
-  ]
   return (
     <section className='section generate-image-section'>
       <div className='topbar'>
-        <select className='topbar-selector'>
-          <option onClick={createCustomSize}>Custom Size</option>
+        <select className='topbar-selector' onChange={handleSizeChange}>
           {
-            sizeOptions.map(sizeOption => (
-              <option value={sizeOption} onClick={handleSizeChange} key={`${sizeOption.name}`}>{sizeOption.name}</option>
+            sheetSizes.map(sheetSize => (
+              <option value={`${sheetSize.name}`} key={`${sheetSize.name}`}>{sheetSize.name}</option>
             ))
           }
+          <option onClick={createCustomSize}>Custom Size</option>
         </select>
         <button className='primary-button' onClick={generateResultImage} disabled={isGenerateDisabled}>Generate</button>
         <button className='primary-button' onClick={downloadImage} disabled={isDownloadDisabled}>Download</button>
       </div>
       <div className='generate-image-section-main'>
-        {
-          resultImage ? resultImage :
+        { 
+          resultImage && !isResultLoading ?
+            <img className="result-image"
+              src={resultImage}
+              alt='Result'
+            />
+            :
             <div>
-              Click 'Generate' to generate result
+              {isResultLoading ? 'Generating...' : 'Click \'Generate\' to generate result'}
             </div>
         }
       </div>
@@ -238,20 +286,38 @@ function App() {
   const cmToPx = (cm) => (((cm * currentDPI) / INCH_TO_CM) * INTEGER_ROUNDING_FACTOR);
   const inchToPx = (inch) => (cmToPx(inchToCm(inch)));
 
-  // Image sizes
-  const imageSizes = [ // In px
+  // Image and Sheet sizes in px
+  const imageSizes = [
     {
-      "name": '2x2 inch (Indian passport)',
-      "width": inchToPx(2),
-      "height": inchToPx(2),
+      "name": '3cm x 4cm',
+      "width": cmToPx(2.95), // 0.05cm less than said size to preserve gap between images
+      "height": cmToPx(3.95), // same reason as above
     },
     {
       "name": '3.5cm x 4.5cm',
       "width": cmToPx(3.5),
       "height": cmToPx(4.5),
+    },
+    {
+      "name": '2x2 inch (Indian passport)',
+      "width": inchToPx(2),
+      "height": inchToPx(2),
+    }
+  ]
+  const sheetSizes = [
+    {
+      "name": "A4",
+      "width": cmToPx(21),
+      "height": cmToPx(29.7)
+    },
+    {
+      "name": "A3",
+      "width": cmToPx(29.7),
+      "height": cmToPx(42)
     }
   ]
   const [selectedImageSize, setSelectedImageSize] = useState(imageSizes[0]);
+  const [selectedSheetSize, setSelectedSheetSize] = useState(sheetSizes[0]);
 
   // Image
   const [image, setImage] = useState({
@@ -334,6 +400,12 @@ function App() {
 
       <GenerateImage
         isGenerateDisabled={isGenerateDisabled}
+        cmToPx={cmToPx}
+        sheetSizes={sheetSizes}
+        selectedSheetSize={selectedSheetSize}
+        setSelectedSheetSize={setSelectedSheetSize}
+        image={image}
+        selectedImageSize={selectedImageSize}
       />
 
       <ThemeSwitchButton />
