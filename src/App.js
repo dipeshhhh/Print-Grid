@@ -6,6 +6,7 @@ import ThemeSwitchButton from './Components/ThemeSwitchButton/ThemeSwitchButton.
 import EditButton from './Components/EditButton/EditButton.jsx';
 import ConfirmationDialog from './Components/Dialogs/ConfirmationDialog/ConfirmationDialog.jsx';
 import CropImageDialog from './Components/Dialogs/CropImageDialog/CropImageDialog.jsx';
+import CustomImageSizeDialog from './Components/Dialogs/CustomImageSizeDialog/CustomImageSizeDialog.jsx';
 
 // Icons for Edit Buttons
 import SwapVertIcon from '@mui/icons-material/SwapVert';
@@ -94,9 +95,15 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
 }
 
 function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef, imageSizes, selectedImageSize, setSelectedImageSize }) {
+  const customImageSizeDialogRef = useRef(null);
   const handleCheckboxChange = () => { setIsBordered(!isBordered); }
   const imageSizeHandle = (e) => {
-    setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
+    if (e.target.value !== 'custom') {
+      setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
+    }
+    else {
+      customImageSizeDialogRef.current.showModal();
+    }
   }
   const hiddenFileInputCss = {
     position: 'absolute',
@@ -110,7 +117,7 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef,
     <section className='section image-section'>
       <div className='topbar'>
         <select className='topbar-selector' onChange={imageSizeHandle}>
-          <option value={selectedImageSize.name}>{selectedImageSize.name}</option>
+          {/* <option value={selectedImageSize.name}>{selectedImageSize.name}</option> */}
           {
             imageSizes.map(imageSize => (
               <option value={`${imageSize.name}`} key={`${imageSize.name}`}>
@@ -118,7 +125,9 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef,
               </option>
             ))
           }
+          <option value='custom'>Custom Size</option>
         </select>
+        <CustomImageSizeDialog referrer={customImageSizeDialogRef} />
         {/* For future: adjust custom image size in the topbar itself */}
         <span className='checkbox'>
           <input id='border-check' type='checkbox' checked={isBordered} onChange={handleCheckboxChange} />
@@ -206,7 +215,7 @@ function GenerateImage({ isGenerateDisabled, cmToPx, sheetSizes, selectedSheetSi
       inputImageCanvas.width = selectedImageSize.width;
       inputImageCanvas.height = selectedImageSize.height;
       inputImageCtx.drawImage(inputImage, x, y, newWidth, newHeight);
-      
+
       // Draw the input image on the result canvas
       for (let i = 0; i < noOfColumns; i++) {
         for (let j = 0; j < noOfRows; j++) {
@@ -224,7 +233,7 @@ function GenerateImage({ isGenerateDisabled, cmToPx, sheetSizes, selectedSheetSi
       setIsResultLoading(false);
     }
     inputImage.src = image.imageUrl;
-  }  
+  }
   const downloadImage = () => {
     if (!resultImage) return;
     const link = document.createElement('a');
@@ -252,7 +261,7 @@ function GenerateImage({ isGenerateDisabled, cmToPx, sheetSizes, selectedSheetSi
         <button className='primary-button' onClick={downloadImage} disabled={isDownloadDisabled}>Download</button>
       </div>
       <div className='generate-image-section-main'>
-        { 
+        {
           resultImage && !isResultLoading ?
             <img className="result-image"
               src={resultImage}

@@ -10,18 +10,18 @@ function CustomImageSizeDialog({ referrer }) {
           <h5 className='dialog-title'>Custom Image Size</h5>
           <div className='custom-image-size-inputs'>
             <div className='custom-image-size-input'>
-              <label>Width: </label>
-              <input type='number' className='custom-image-width' />
-              <select>
+              <label className='custom-image-size-input-label'>Width: </label>
+              <input type='number' className='custom-image-size-input-input custom-image-width' />
+              <select className='custom-image-size-input-unit'>
                 <option>cm</option>
                 <option>inch</option>
                 <option>px</option>
               </select>
             </div>
             <div className='custom-image-size-input'>
-              <label>Height: </label>
-              <input type='number' className='custom-image-height' />
-              <select>
+              <label className='custom-image-size-input-label'>Height: </label>
+              <input type='number' className='custom-image-size-input-input custom-image-height' />
+              <select className='custom-image-size-input-unit'>
                 <option>cm</option>
                 <option>inch</option>
                 <option>px</option>
@@ -38,4 +38,4 @@ function CustomImageSizeDialog({ referrer }) {
   )
 }
 
-export default ConfirmationDialog;
+export default CustomImageSizeDialog;
