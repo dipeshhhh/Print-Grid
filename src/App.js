@@ -185,7 +185,7 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef,
   )
 }
 
-function GenerateImage({ isGenerateDisabled, cmToPx, sheetSizes, setSheetSizes, selectedSheetSize, setSelectedSheetSize, image, selectedImageSize, inchToPx }) {
+function GenerateImage({ isGenerateDisabled, isBordered, setIsBordered, cmToPx, sheetSizes, setSheetSizes, selectedSheetSize, setSelectedSheetSize, image, selectedImageSize, inchToPx }) {
   const [resultImage, setResultImage] = useState(null);
   const [isDownloadDisabled, setIsDownloadDisabled] = useState(true);
   const [isResultLoading, setIsResultLoading] = useState(false);
@@ -195,7 +195,7 @@ function GenerateImage({ isGenerateDisabled, cmToPx, sheetSizes, setSheetSizes, 
   const generateResultImage = () => {
     if (!image.imageUrl) return;
     setIsResultLoading(true);
-    
+
     const columnGap = 3; // Gap between images in a column (px)
     const rowGap = 30; // Gap between images in a row (px)
     const noOfColumns = Math.floor(selectedSheetSize.width / (selectedImageSize.width + (columnGap * 2)));
@@ -229,6 +229,30 @@ function GenerateImage({ isGenerateDisabled, cmToPx, sheetSizes, setSheetSizes, 
       inputImageCanvas.width = selectedImageSize.width;
       inputImageCanvas.height = selectedImageSize.height;
       inputImageCtx.drawImage(inputImage, x, y, newWidth, newHeight);
+      if (isBordered) { // Add border to the image
+        let borderWidth = 5; // Border width (px)
+        
+        // Adjust border width according to the size of the image
+        if((selectedImageSize.width < 10) || (selectedImageSize.height < 10)) borderWidth = 0;
+        else if((selectedImageSize.width < 30) || (selectedImageSize.height < 30)) borderWidth = 1;
+
+        const borderedInputImageCanvas = document.createElement('canvas');
+        const borderedInputImageCtx = borderedInputImageCanvas.getContext('2d');
+        borderedInputImageCanvas.width = selectedImageSize.width;
+        borderedInputImageCanvas.height = selectedImageSize.height;
+        borderedInputImageCtx.fillStyle = 'black';
+        borderedInputImageCtx.fillRect(0, 0, borderedInputImageCanvas.width, borderedInputImageCanvas.height);
+
+        borderedInputImageCtx.drawImage(
+          inputImageCanvas,
+          borderWidth,
+          borderWidth,
+          selectedImageSize.width - (borderWidth * 2),
+          selectedImageSize.height - (borderWidth * 2)
+        );
+
+        inputImageCtx.drawImage(borderedInputImageCanvas, 0, 0, selectedImageSize.width, selectedImageSize.height);
+      }
 
       // Draw the input image on the result canvas
       for (let i = 0; i < noOfColumns; i++) {
@@ -312,6 +336,7 @@ function App() {
 
 
   // Required variables and constants
+  //? Maybe move these to a separate file
   let currentDPI = 300;
   const INCH_TO_CM = 2.54;
   const INTEGER_ROUNDING_FACTOR = 2.54 / 2.5; /// Factor to round cm to px conversion, preserving aspect ratio.
@@ -436,6 +461,8 @@ function App() {
 
       <GenerateImage
         isGenerateDisabled={isGenerateDisabled}
+        isBordered={isBordered}
+        setIsBordered={setIsBordered}
         sheetSizes={sheetSizes}
         setSheetSizes={setSheetSizes}
         selectedSheetSize={selectedSheetSize}
