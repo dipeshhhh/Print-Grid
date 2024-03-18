@@ -6,7 +6,7 @@ import ThemeSwitchButton from './Components/ThemeSwitchButton/ThemeSwitchButton.
 import EditButton from './Components/EditButton/EditButton.jsx';
 import ConfirmationDialog from './Components/Dialogs/ConfirmationDialog/ConfirmationDialog.jsx';
 import CropImageDialog from './Components/Dialogs/CropImageDialog/CropImageDialog.jsx';
-import CustomImageSizeDialog from './Components/Dialogs/CustomImageSizeDialog/CustomImageSizeDialog.jsx';
+import CustomSizeDialog from './Components/Dialogs/CustomSizeDialog/CustomSizeDialog.jsx';
 
 // Icons for Edit Buttons
 import SwapVertIcon from '@mui/icons-material/SwapVert';
@@ -94,8 +94,9 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
   )
 }
 
-function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef, imageSizes, selectedImageSize, setSelectedImageSize }) {
+function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef, imageSizes, setImageSizes, selectedImageSize, setSelectedImageSize, cmToPx, inchToPx }) {
   const customImageSizeDialogRef = useRef(null);
+  const imageSizeSelectorRef = useRef(null);
   const handleCheckboxChange = () => { setIsBordered(!isBordered); }
   const imageSizeHandle = (e) => {
     if (e.target.value !== 'custom') {
@@ -116,7 +117,7 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef,
   return (
     <section className='section image-section'>
       <div className='topbar'>
-        <select className='topbar-selector' onChange={imageSizeHandle}>
+        <select className='topbar-selector' onChange={imageSizeHandle} ref={imageSizeSelectorRef}>
           {/* <option value={selectedImageSize.name}>{selectedImageSize.name}</option> */}
           {
             imageSizes.map(imageSize => (
@@ -127,7 +128,17 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef,
           }
           <option value='custom'>Custom Size</option>
         </select>
-        <CustomImageSizeDialog referrer={customImageSizeDialogRef} />
+        <CustomSizeDialog
+          referrer={customImageSizeDialogRef}
+          selectorRef={imageSizeSelectorRef}
+          title='Custom Image Size'
+          sizes={imageSizes}
+          setSizes={setImageSizes}
+          selectedSize={selectedImageSize}
+          setSelectedSize={setSelectedImageSize}
+          cmToPx={cmToPx}
+          inchToPx={inchToPx}
+        />
         {/* For future: adjust custom image size in the topbar itself */}
         <span className='checkbox'>
           <input id='border-check' type='checkbox' checked={isBordered} onChange={handleCheckboxChange} />
@@ -174,14 +185,17 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef,
   )
 }
 
-function GenerateImage({ isGenerateDisabled, cmToPx, sheetSizes, selectedSheetSize, setSelectedSheetSize, image, selectedImageSize }) {
+function GenerateImage({ isGenerateDisabled, cmToPx, sheetSizes, setSheetSizes, selectedSheetSize, setSelectedSheetSize, image, selectedImageSize, inchToPx }) {
   const [resultImage, setResultImage] = useState(null);
   const [isDownloadDisabled, setIsDownloadDisabled] = useState(true);
   const [isResultLoading, setIsResultLoading] = useState(false);
+  const customSheetSizeDialogRef = useRef(null);
+  const sheetSizeSelectorRef = useRef(null);
 
   const generateResultImage = () => {
     if (!image.imageUrl) return;
     setIsResultLoading(true);
+    
     const columnGap = 3; // Gap between images in a column (px)
     const rowGap = 30; // Gap between images in a row (px)
     const noOfColumns = Math.floor(selectedSheetSize.width / (selectedImageSize.width + (columnGap * 2)));
@@ -242,21 +256,31 @@ function GenerateImage({ isGenerateDisabled, cmToPx, sheetSizes, selectedSheetSi
     link.click();
   }
   const handleSizeChange = (e) => {
-    setSelectedSheetSize(sheetSizes.find(sheetSize => sheetSize.name === e.target.value));
-  }
-  const createCustomSize = () => {
+    if (e.target.value !== 'custom') setSelectedSheetSize(sheetSizes.find(sheetSize => sheetSize.name === e.target.value));
+    else customSheetSizeDialogRef.current.showModal();
   }
   return (
     <section className='section generate-image-section'>
       <div className='topbar'>
-        <select className='topbar-selector' onChange={handleSizeChange}>
+        <select className='topbar-selector' onChange={handleSizeChange} ref={sheetSizeSelectorRef}>
           {
             sheetSizes.map(sheetSize => (
               <option value={`${sheetSize.name}`} key={`${sheetSize.name}`}>{sheetSize.name}</option>
             ))
           }
-          <option onClick={createCustomSize}>Custom Size</option>
+          <option value='custom'>Custom Size</option>
         </select>
+        <CustomSizeDialog
+          referrer={customSheetSizeDialogRef}
+          selectorRef={sheetSizeSelectorRef}
+          title='Custom Sheet Size'
+          sizes={sheetSizes}
+          setSizes={setSheetSizes}
+          selectedSize={selectedSheetSize}
+          setSelectedSize={setSelectedSheetSize}
+          cmToPx={cmToPx}
+          inchToPx={inchToPx}
+        />
         <button className='primary-button' onClick={generateResultImage} disabled={isGenerateDisabled}>Generate</button>
         <button className='primary-button' onClick={downloadImage} disabled={isDownloadDisabled}>Download</button>
       </div>
@@ -296,7 +320,7 @@ function App() {
   const inchToPx = (inch) => (cmToPx(inchToCm(inch)));
 
   // Image and Sheet sizes in px
-  const imageSizes = [
+  const [imageSizes, setImageSizes] = useState([
     {
       "name": '3cm x 4cm',
       "width": cmToPx(2.95), // 0.05cm less than said size to preserve gap between images
@@ -312,8 +336,8 @@ function App() {
       "width": inchToPx(2),
       "height": inchToPx(2),
     }
-  ]
-  const sheetSizes = [
+  ])
+  const [sheetSizes, setSheetSizes] = useState([
     {
       "name": "A4",
       "width": cmToPx(21),
@@ -324,7 +348,7 @@ function App() {
       "width": cmToPx(29.7),
       "height": cmToPx(42)
     }
-  ]
+  ]);
   const [selectedImageSize, setSelectedImageSize] = useState(imageSizes[0]);
   const [selectedSheetSize, setSelectedSheetSize] = useState(sheetSizes[0]);
 
@@ -403,18 +427,23 @@ function App() {
         setIsBordered={setIsBordered}
         inputRef={inputRef}
         imageSizes={imageSizes}
+        setImageSizes={setImageSizes}
         selectedImageSize={selectedImageSize}
         setSelectedImageSize={setSelectedImageSize}
+        cmToPx={cmToPx}
+        inchToPx={inchToPx}
       />
 
       <GenerateImage
         isGenerateDisabled={isGenerateDisabled}
-        cmToPx={cmToPx}
         sheetSizes={sheetSizes}
+        setSheetSizes={setSheetSizes}
         selectedSheetSize={selectedSheetSize}
         setSelectedSheetSize={setSelectedSheetSize}
         image={image}
         selectedImageSize={selectedImageSize}
+        cmToPx={cmToPx}
+        inchToPx={inchToPx}
       />
 
       <ThemeSwitchButton />

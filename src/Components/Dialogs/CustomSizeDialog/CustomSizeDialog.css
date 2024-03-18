@@ -10,7 +10,7 @@
 
 .custom-image-size-input {
   display: grid;
-  grid-template-columns: 0.15fr 0.5fr 0.25fr;
+  grid-template-columns: 0.15fr 0.5fr 0.15fr;
   flex-direction: row;
   gap: 0.5rem;
   justify-content: center;
@@ -21,14 +21,15 @@
   border: none;
   background-color: var(--background);
   color: var(--text);
-  padding: 1rem;
+  padding: 1ch;
   border-radius: var(--container-radius);
 }
 
 .custom-image-size-input-unit {
+  cursor: pointer;
   border: none;
   background-color: var(--background);
   color: var(--text);
-  padding: 1rem;
+  padding: 1ch;
   border-radius: var(--container-radius);
 }
