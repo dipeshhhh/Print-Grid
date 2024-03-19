@@ -22,7 +22,7 @@ import RestoreIcon from '@mui/icons-material/Restore';
 
 // function applyChangesToImage(){}
 
-function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize, isUserAddingFilters, setIsUserAddingFilters, isUserCropping, setIsUserCropping, editHistory, editHistoryIndex, didARedo }) {
+function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize, isUserAddingFilters, setIsUserAddingFilters, isUserCropping, setIsUserCropping, editHistory, editHistoryIndex, didARedo, isUndoDisabled, isRedoDisabled }) {
   const cropImageDialogRef = useRef(null);
   const confirmNewImageDialogRef = useRef(null);
   const filterDialogRef = useRef(null);
@@ -66,17 +66,17 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
       horizontalScale: 1,
     });
   }
-  const buttons = [
-    { icon: <SwapVertIcon />, text: 'Flip left', onClickFunction: flipVertical },
-    { icon: <SwapHorizIcon />, text: 'Flip right', onClickFunction: flipHorizontal, },
-    { icon: <Rotate90DegreesCwIcon />, text: 'Rotate Clockwise', onClickFunction: rotateClockwise },
-    { icon: <Rotate90DegreesCcwIcon />, text: 'Rotate counter-clockwise', onClickFunction: rotateAntiClockwise },
-    { icon: <FilterAltIcon />, text: 'Filters', onClickFunction: filters },
-    { icon: <CropIcon />, text: 'Crop', onClickFunction: crop },
-    { icon: <UndoIcon />, text: 'Undo', onClickFunction: undo },
-    { icon: <RedoIcon />, text: 'Redo', onClickFunction: redo },
-    { icon: <RestoreIcon />, text: 'Reset', onClickFunction: reset },
-  ];
+  // const buttons = [
+  //   { icon: <SwapVertIcon />, text: 'Flip left', onClickFunction: flipVertical },
+  //   { icon: <SwapHorizIcon />, text: 'Flip right', onClickFunction: flipHorizontal, },
+  //   { icon: <Rotate90DegreesCwIcon />, text: 'Rotate Clockwise', onClickFunction: rotateClockwise },
+  //   { icon: <Rotate90DegreesCcwIcon />, text: 'Rotate counter-clockwise', onClickFunction: rotateAntiClockwise },
+  //   { icon: <FilterAltIcon />, text: 'Filters', onClickFunction: filters },
+  //   { icon: <CropIcon />, text: 'Crop', onClickFunction: crop },
+  //   { icon: <UndoIcon />, text: 'Undo', onClickFunction: undo },
+  //   { icon: <RedoIcon />, text: 'Redo', onClickFunction: redo },
+  //   { icon: <RestoreIcon />, text: 'Reset', onClickFunction: reset },
+  // ];
   return (
     <section className='section edit-buttons-section'>
       <div className='topbar'>
@@ -89,7 +89,7 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
         />
       </div>
       <div className='sidebar'>
-        {buttons.map(button => (
+        {/* {buttons.map(button => (
           <EditButton
             key={button.text}
             icon={button.icon}
@@ -97,7 +97,61 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
             onClickFunction={button.onClickFunction}
             isEditDisabled={isEditDisabled}
           />
-        ))}
+        ))} */}
+        <EditButton
+          icon={<SwapVertIcon />}
+          text='Flip left'
+          onClickFunction={flipVertical}
+          isEditDisabled={isEditDisabled}
+        />
+        <EditButton
+          icon={<SwapHorizIcon />}
+          text='Flip right'
+          onClickFunction={flipHorizontal}
+          isEditDisabled={isEditDisabled}
+        />
+        <EditButton
+          icon={<Rotate90DegreesCwIcon />}
+          text='Rotate Clockwise'
+          onClickFunction={rotateClockwise}
+          isEditDisabled={isEditDisabled}
+        />
+        <EditButton
+          icon={<Rotate90DegreesCcwIcon />}
+          text='Rotate counter-clockwise'
+          onClickFunction={rotateAntiClockwise}
+          isEditDisabled={isEditDisabled}
+        />
+        <EditButton
+          icon={<FilterAltIcon />}
+          text='Filters'
+          onClickFunction={filters}
+          isEditDisabled={isEditDisabled}
+        />
+        <EditButton
+          icon={<CropIcon />}
+          text='Crop'
+          onClickFunction={crop}
+          isEditDisabled={isEditDisabled}
+        />
+        <EditButton
+          icon={<UndoIcon />}
+          text='Undo'
+          onClickFunction={undo}
+          isEditDisabled={(isUndoDisabled || isEditDisabled)}
+        />
+        <EditButton
+          icon={<RedoIcon />}
+          text='Redo'
+          onClickFunction={redo}
+          isEditDisabled={(isRedoDisabled || isEditDisabled)}
+        />
+        <EditButton
+          icon={<RestoreIcon />}
+          text='Reset'
+          onClickFunction={reset}
+          isEditDisabled={isEditDisabled}
+        />
       </div>
       <FiltersDialog
         referrer={filterDialogRef}
@@ -357,6 +411,8 @@ function App() {
   // Edit buttons and Generate button's state
   const [isGenerateDisabled, setIsGenerateDisabled] = useState(true);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
+  const [isUndoDisabled, setIsUndoDisabled] = useState(true);
+  const [isRedoDisabled, setIsRedoDisabled] = useState(true);
   const [isUserCropping, setIsUserCropping] = useState(false);
   const [isUserAddingFilters, setIsUserAddingFilters] = useState(false);
 
@@ -476,12 +532,12 @@ function App() {
 
     // Add the current image to the edit history
     if (!objectsAreEqual(editHistory.current[editHistoryIndex.current], image)) {
-      if (editHistoryIndex.current === (editHistory.current.length - 1)) {
+      if (editHistoryIndex.current === (editHistory.current.length - 1)) { // If user had not done undo before making a new change
         // If the current image is not the last image in the history, add it to the history
         editHistory.current.push({ ...image });
         editHistoryIndex.current = editHistory.current.length - 1;
       }
-      else if (!didARedo.current) {
+      else if (!didARedo.current) { // If user had done undo before making a new change, also had NOT done a redo after that
         // If the current image is not the last image in the history, remove all the images after the current image and add the current image to the history
         // This is done to remove the forward history when a new change is made after undoing some changes
         editHistory.current.splice(editHistoryIndex.current + 1, editHistory.current.length - editHistoryIndex.current, { ...image });
@@ -489,13 +545,15 @@ function App() {
       }
       // Reset the redo flag
       didARedo.current = false;
-
-      //Limit the history to 10 images
-      if (editHistory.current.length > historyLimit) {
-        editHistory.current.shift();
-        editHistoryIndex.current--;
-      }
     }
+    //Limit the history to 10 images
+    if (editHistory.current.length > historyLimit) {
+      editHistory.current.shift();
+      editHistoryIndex.current--;
+    }
+    // Enable/Disable undo and redo buttons
+    setIsUndoDisabled(editHistoryIndex.current === 0);
+    setIsRedoDisabled(editHistoryIndex.current === (editHistory.current.length - 1));
   }, [image])
 
   return (
@@ -516,6 +574,8 @@ function App() {
         editHistory={editHistory}
         editHistoryIndex={editHistoryIndex}
         didARedo={didARedo}
+        isUndoDisabled={isUndoDisabled}
+        isRedoDisabled={isRedoDisabled}
       />
 
       <ImageSection
