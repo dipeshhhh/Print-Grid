@@ -16,11 +16,13 @@ import Rotate90DegreesCcwIcon from '@mui/icons-material/Rotate90DegreesCcw';
 import Rotate90DegreesCwIcon from '@mui/icons-material/Rotate90DegreesCw';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import CropIcon from '@mui/icons-material/Crop';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
 import RestoreIcon from '@mui/icons-material/Restore';
 
 // function applyChangesToImage(){}
 
-function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize, isUserAddingFilters, setIsUserAddingFilters, isUserCropping, setIsUserCropping }) {
+function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize, isUserAddingFilters, setIsUserAddingFilters, isUserCropping, setIsUserCropping, editHistory, editHistoryIndex, didARedo }) {
   const cropImageDialogRef = useRef(null);
   const confirmNewImageDialogRef = useRef(null);
   const filterDialogRef = useRef(null);
@@ -39,6 +41,17 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
   const rotateAntiClockwise = () => { setImage({ ...image, rotate: image.rotate - 90 }) }
   const filters = () => { filterDialogRef.current.showModal(); setIsUserAddingFilters(true); }
   const crop = () => { cropImageDialogRef.current.showModal(); setIsUserCropping(true); }
+  const undo = () => {
+    if (editHistoryIndex.current > 0) {
+      setImage({ ...editHistory.current[--editHistoryIndex.current] });
+    }
+  }
+  const redo = () => {
+    if (editHistoryIndex.current < (editHistory.current.length - 1)) {
+      didARedo.current = true;
+      setImage({ ...editHistory.current[++editHistoryIndex.current] });
+    }
+  }
   const reset = () => {
     setImage({
       imageUrl: image.imageUrl,
@@ -60,6 +73,8 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
     { icon: <Rotate90DegreesCcwIcon />, text: 'Rotate counter-clockwise', onClickFunction: rotateAntiClockwise },
     { icon: <FilterAltIcon />, text: 'Filters', onClickFunction: filters },
     { icon: <CropIcon />, text: 'Crop', onClickFunction: crop },
+    { icon: <UndoIcon />, text: 'Undo', onClickFunction: undo },
+    { icon: <RedoIcon />, text: 'Redo', onClickFunction: redo },
     { icon: <RestoreIcon />, text: 'Reset', onClickFunction: reset },
   ];
   return (
@@ -354,6 +369,26 @@ function App() {
   const cmToPx = (cm) => (((cm * currentDPI) / INCH_TO_CM) * INTEGER_ROUNDING_FACTOR);
   const inchToPx = (inch) => (cmToPx(inchToCm(inch)));
 
+  const editHistory = useRef([]);
+  const editHistoryIndex = useRef(-1);
+  const didARedo = useRef(false);
+  const historyLimit = 10;
+
+  function objectsAreEqual(obj1, obj2) {
+    if (!obj1 || !obj2) return false;
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+    for (let key of keys1) {
+      if (obj1[key] !== obj2[key]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   // Image and Sheet sizes in px
   const [imageSizes, setImageSizes] = useState([
     {
@@ -438,6 +473,29 @@ function App() {
     };
     setIsEditDisabled(false);
     setIsGenerateDisabled(false);
+
+    // Add the current image to the edit history
+    if (!objectsAreEqual(editHistory.current[editHistoryIndex.current], image)) {
+      if (editHistoryIndex.current === (editHistory.current.length - 1)) {
+        // If the current image is not the last image in the history, add it to the history
+        editHistory.current.push({ ...image });
+        editHistoryIndex.current = editHistory.current.length - 1;
+      }
+      else if (!didARedo.current) {
+        // If the current image is not the last image in the history, remove all the images after the current image and add the current image to the history
+        // This is done to remove the forward history when a new change is made after undoing some changes
+        editHistory.current.splice(editHistoryIndex.current + 1, editHistory.current.length - editHistoryIndex.current, { ...image });
+        editHistoryIndex.current = editHistory.current.length - 1;
+      }
+      // Reset the redo flag
+      didARedo.current = false;
+
+      //Limit the history to 10 images
+      if (editHistory.current.length > historyLimit) {
+        editHistory.current.shift();
+        editHistoryIndex.current--;
+      }
+    }
   }, [image])
 
   return (
@@ -455,6 +513,9 @@ function App() {
         setIsUserAddingFilters={setIsUserAddingFilters}
         isUserCropping={isUserCropping}
         setIsUserCropping={setIsUserCropping}
+        editHistory={editHistory}
+        editHistoryIndex={editHistoryIndex}
+        didARedo={didARedo}
       />
 
       <ImageSection
