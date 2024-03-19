@@ -116,6 +116,14 @@
   overflow-x: hidden;
 }
 
+.border-checkbox{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5ch;
+}
+
 .image-preview {
   max-width: 100%;
   max-height: calc( 100vh - 64px );

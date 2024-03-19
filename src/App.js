@@ -5,6 +5,7 @@ import './App.css';
 import ThemeSwitchButton from './Components/ThemeSwitchButton/ThemeSwitchButton.jsx';
 import EditButton from './Components/EditButton/EditButton.jsx';
 import ConfirmationDialog from './Components/Dialogs/ConfirmationDialog/ConfirmationDialog.jsx';
+import FiltersDialog from './Components/Dialogs/FiltersDialog/FiltersDialog.jsx';
 import CropImageDialog from './Components/Dialogs/CropImageDialog/CropImageDialog.jsx';
 import CustomSizeDialog from './Components/Dialogs/CustomSizeDialog/CustomSizeDialog.jsx';
 
@@ -13,13 +14,16 @@ import SwapVertIcon from '@mui/icons-material/SwapVert';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import Rotate90DegreesCcwIcon from '@mui/icons-material/Rotate90DegreesCcw';
 import Rotate90DegreesCwIcon from '@mui/icons-material/Rotate90DegreesCw';
-import FilterBAndWIcon from '@mui/icons-material/FilterBAndW';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import CropIcon from '@mui/icons-material/Crop';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize, isUserCropping, setIsUserCropping }) {
+// function applyChangesToImage(){}
+
+function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize, isUserAddingFilters, setIsUserAddingFilters, isUserCropping, setIsUserCropping }) {
   const cropImageDialogRef = useRef(null);
   const confirmNewImageDialogRef = useRef(null);
+  const filterDialogRef = useRef(null);
   const handleNewImageButton = () => {
     if (image.imageUrl) {
       confirmNewImageDialogRef.current.showModal();
@@ -33,7 +37,7 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
   const flipVertical = () => { setImage({ ...image, horizontalScale: image.horizontalScale === 1 ? -1 : 1 }) }
   const rotateClockwise = () => { setImage({ ...image, rotate: image.rotate + 90 }) }
   const rotateAntiClockwise = () => { setImage({ ...image, rotate: image.rotate - 90 }) }
-  const grayscale = () => { setImage({ ...image, grayscale: image.grayscale === 1 ? 0 : 1 }) }
+  const filters = () => { filterDialogRef.current.showModal(); setIsUserAddingFilters(true); }
   const crop = () => { cropImageDialogRef.current.showModal(); setIsUserCropping(true); }
   const reset = () => {
     setImage({
@@ -54,7 +58,7 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
     { icon: <SwapHorizIcon />, text: 'Flip right', onClickFunction: flipHorizontal, },
     { icon: <Rotate90DegreesCwIcon />, text: 'Rotate Clockwise', onClickFunction: rotateClockwise },
     { icon: <Rotate90DegreesCcwIcon />, text: 'Rotate counter-clockwise', onClickFunction: rotateAntiClockwise },
-    { icon: <FilterBAndWIcon />, text: 'Grayscale', onClickFunction: grayscale },
+    { icon: <FilterAltIcon />, text: 'Filters', onClickFunction: filters },
     { icon: <CropIcon />, text: 'Crop', onClickFunction: crop },
     { icon: <RestoreIcon />, text: 'Reset', onClickFunction: reset },
   ];
@@ -80,6 +84,13 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
           />
         ))}
       </div>
+      <FiltersDialog
+        referrer={filterDialogRef}
+        image={image}
+        setImage={setImage}
+        isUserAddingFilters={isUserAddingFilters}
+        setIsUserAddingFilters={setIsUserAddingFilters}
+      />
       <CropImageDialog
         referrer={cropImageDialogRef}
         image={image}
@@ -139,8 +150,7 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef,
           cmToPx={cmToPx}
           inchToPx={inchToPx}
         />
-        {/* For future: adjust custom image size in the topbar itself */}
-        <span className='checkbox'>
+        <span className='border-checkbox'>
           <input id='border-check' type='checkbox' checked={isBordered} onChange={handleCheckboxChange} />
           <label htmlFor='border-check'>Border</label>
         </span>
@@ -231,10 +241,10 @@ function GenerateImage({ isGenerateDisabled, isBordered, setIsBordered, cmToPx, 
       inputImageCtx.drawImage(inputImage, x, y, newWidth, newHeight);
       if (isBordered) { // Add border to the image
         let borderWidth = 5; // Border width (px)
-        
+
         // Adjust border width according to the size of the image
-        if((selectedImageSize.width < 10) || (selectedImageSize.height < 10)) borderWidth = 0;
-        else if((selectedImageSize.width < 30) || (selectedImageSize.height < 30)) borderWidth = 1;
+        if ((selectedImageSize.width < 10) || (selectedImageSize.height < 10)) borderWidth = 0;
+        else if ((selectedImageSize.width < 30) || (selectedImageSize.height < 30)) borderWidth = 1;
 
         const borderedInputImageCanvas = document.createElement('canvas');
         const borderedInputImageCtx = borderedInputImageCanvas.getContext('2d');
@@ -333,7 +343,7 @@ function App() {
   const [isGenerateDisabled, setIsGenerateDisabled] = useState(true);
   const [isEditDisabled, setIsEditDisabled] = useState(true);
   const [isUserCropping, setIsUserCropping] = useState(false);
-
+  const [isUserAddingFilters, setIsUserAddingFilters] = useState(false);
 
   // Required variables and constants
   //? Maybe move these to a separate file
@@ -441,6 +451,8 @@ function App() {
         imageSizes={imageSizes}
         selectedImageSize={selectedImageSize}
         setSelectedImageSize={setSelectedImageSize}
+        isUserAddingFilters={isUserAddingFilters}
+        setIsUserAddingFilters={setIsUserAddingFilters}
         isUserCropping={isUserCropping}
         setIsUserCropping={setIsUserCropping}
       />

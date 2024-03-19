@@ -1,0 +1,99 @@
+.filter-dialog {
+  flex-direction: column;
+  /* grid-template-columns: 1.25fr 0.75fr; */
+  max-height: 100%;
+  /* max-width: 100%; */
+  width: max-content;
+  /* overflow: hidden; */
+}
+
+.filters-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.filters-preview-section {
+  background-color: var(--background);
+  padding: var(--dialog-padding);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  max-height: calc(100vh - 240px);
+  overflow: hidden;
+}
+
+.filters-preview-image {
+  max-width: 100%;
+  max-height: 100%;
+  /* max-height: calc(100vh - 240px); */
+  z-index: 1;
+}
+
+.filters-adjustment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1ch;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+.filter-adjustment-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1ch;
+  padding: var(--dialog-padding);
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+.filters-adjustment-item {
+  display: grid;
+  grid-template-columns: 12ch 1fr 6ch;
+  gap: 1ch;
+}
+
+.filters-adjustment-item>* {
+  justify-self: start;
+  width: 100%;
+}
+
+.filter-adjustment-label {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1ch;
+}
+
+.filter-adjustment-input {
+  cursor: pointer;
+}
+
+.filter-adjustment-number-input {
+  cursor: text;
+  background-color: var(--background);
+  color: var(--text);
+  border: none;
+  border-radius: 5px;
+  padding: 0.5ch 1ch;
+}
+
+.empty-gap{
+  display: flex;
+  flex-grow: 1;
+}
+
+.filter-reset-button{
+  display: flex;
+  gap: 1ch;
+  align-items: center;
+  justify-self: end;
+  align-self: flex-start;
+  padding: 1ch 2ch;
+}
