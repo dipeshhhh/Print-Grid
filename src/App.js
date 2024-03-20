@@ -20,7 +20,7 @@ import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize, isUserAddingFilters, setIsUserAddingFilters, isUserCropping, setIsUserCropping, editHistory, editHistoryIndex, didARedo, isUndoDisabled, isRedoDisabled, applyChangesToImage }) {
+function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize, isUserAddingFilters, setIsUserAddingFilters, isUserCropping, setIsUserCropping, editHistory, editHistoryIndex, redoFlag, isUndoDisabled, isRedoDisabled, applyChangesToImage, areChangesBeingApplied }) {
   const cropImageDialogRef = useRef(null);
   const confirmNewImageDialogRef = useRef(null);
   const filterDialogRef = useRef(null);
@@ -37,8 +37,10 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
   const flipVertical = () => { setImage({ ...image, verticalScale: image.verticalScale === 1 ? -1 : 1 }) }
   const rotateClockwise = () => { setImage({ ...image, rotate: image.rotate + 90 }) }
   const rotateAntiClockwise = () => { setImage({ ...image, rotate: image.rotate - 90 }) }
-  const filters = () => { filterDialogRef.current.showModal(); setIsUserAddingFilters(true); }
+  const filters = () => { applyChangesToImage(); filterDialogRef.current.showModal(); setIsUserAddingFilters(true); }
+  // const filters = async () => { const waitForImage = await applyChangesToImage(); filterDialogRef.current.showModal(); setIsUserAddingFilters(true); }
   const crop = () => { applyChangesToImage(); cropImageDialogRef.current.showModal(); setIsUserCropping(true); }
+  // const crop = async () => { const waitForImage = await applyChangesToImage(); cropImageDialogRef.current.showModal(); setIsUserCropping(true); }
   const undo = () => {
     if (editHistoryIndex.current > 0) {
       setImage({ ...editHistory.current[--editHistoryIndex.current] });
@@ -46,7 +48,7 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
   }
   const redo = () => {
     if (editHistoryIndex.current < (editHistory.current.length - 1)) {
-      didARedo.current = true;
+      redoFlag.current = true;
       setImage({ ...editHistory.current[++editHistoryIndex.current] });
     }
   }
@@ -137,6 +139,7 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
         setImage={setImage}
         isUserAddingFilters={isUserAddingFilters}
         setIsUserAddingFilters={setIsUserAddingFilters}
+        areChangesBeingApplied={areChangesBeingApplied}
       />
       <CropImageDialog
         referrer={cropImageDialogRef}
@@ -147,6 +150,7 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
         setSelectedImageSize={setSelectedImageSize}
         isUserCropping={isUserCropping}
         setIsUserCropping={setIsUserCropping}
+        areChangesBeingApplied={areChangesBeingApplied}
       />
     </section>
   )
@@ -242,17 +246,17 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef,
   )
 }
 
-function GenerateImage({ isGenerateDisabled, isBordered, setIsBordered, cmToPx, sheetSizes, setSheetSizes, selectedSheetSize, setSelectedSheetSize, image, selectedImageSize, inchToPx, applyChangesToImage }) {
+function GenerateImage({ isGenerateDisabled, isBordered, setIsBordered, cmToPx, sheetSizes, setSheetSizes, selectedSheetSize, setSelectedSheetSize, image, selectedImageSize, inchToPx, applyChangesToImage, generatingResultFlag }) {
   const [resultImage, setResultImage] = useState(null);
   const [isDownloadDisabled, setIsDownloadDisabled] = useState(true);
   const [isResultLoading, setIsResultLoading] = useState(false);
   const customSheetSizeDialogRef = useRef(null);
   const sheetSizeSelectorRef = useRef(null);
 
-  const generateResultImage = () => {
+  const generateResultImage = async () => {
     if (!image.imageUrl) return;
+    generatingResultFlag.current = true;
     setIsResultLoading(true);
-    applyChangesToImage();
 
     const columnGap = 3; // Gap between images in a column (px)
     const rowGap = 30; // Gap between images in a row (px)
@@ -266,69 +270,87 @@ function GenerateImage({ isGenerateDisabled, isBordered, setIsBordered, cmToPx, 
     resultImageCtx.fillStyle = 'white';
     resultImageCtx.fillRect(0, 0, resultImageCanvas.width, resultImageCanvas.height);
 
-    const inputImage = new Image();
-    inputImage.onload = () => {
-      // Adjust and center the image to fit the selected image size
-      const inputImageCanvas = document.createElement('canvas');
-      const inputImageCtx = inputImageCanvas.getContext('2d');
-      let newWidth, newHeight, x, y;
+    try {
+      const imageUrl = await applyChangesToImage();
 
-      newWidth = selectedImageSize.width;
-      newHeight = (inputImage.naturalHeight / inputImage.naturalWidth) * selectedImageSize.width;
-      x = 0;
-      y = -((newHeight / 2) - (selectedImageSize.height / 2));
-      if (newHeight < selectedImageSize.height) {
-        newWidth = (inputImage.naturalWidth / inputImage.naturalHeight) * selectedImageSize.height;
-        newHeight = selectedImageSize.height;
-        x = -((newWidth / 2) - (selectedImageSize.width / 2));
-        y = 0;
-      }
+      const inputImage = new Image();
+      inputImage.onload = () => {
+        // Adjust and center the image to fit the selected image size
+        const inputImageCanvas = document.createElement('canvas');
+        const inputImageCtx = inputImageCanvas.getContext('2d');
+        let newWidth, newHeight, x, y;
 
-      inputImageCanvas.width = selectedImageSize.width;
-      inputImageCanvas.height = selectedImageSize.height;
-      inputImageCtx.drawImage(inputImage, x, y, newWidth, newHeight);
-      if (isBordered) { // Add border to the image
-        let borderWidth = 5; // Border width (px)
-
-        // Adjust border width according to the size of the image
-        if ((selectedImageSize.width < 10) || (selectedImageSize.height < 10)) borderWidth = 0;
-        else if ((selectedImageSize.width < 30) || (selectedImageSize.height < 30)) borderWidth = 1;
-
-        const borderedInputImageCanvas = document.createElement('canvas');
-        const borderedInputImageCtx = borderedInputImageCanvas.getContext('2d');
-        borderedInputImageCanvas.width = selectedImageSize.width;
-        borderedInputImageCanvas.height = selectedImageSize.height;
-        borderedInputImageCtx.fillStyle = 'black';
-        borderedInputImageCtx.fillRect(0, 0, borderedInputImageCanvas.width, borderedInputImageCanvas.height);
-
-        borderedInputImageCtx.drawImage(
-          inputImageCanvas,
-          borderWidth,
-          borderWidth,
-          selectedImageSize.width - (borderWidth * 2),
-          selectedImageSize.height - (borderWidth * 2)
-        );
-
-        inputImageCtx.drawImage(borderedInputImageCanvas, 0, 0, selectedImageSize.width, selectedImageSize.height);
-      }
-
-      // Draw the input image on the result canvas
-      for (let i = 0; i < noOfColumns; i++) {
-        for (let j = 0; j < noOfRows; j++) {
-          resultImageCtx.drawImage(
-            inputImageCanvas,
-            (i * (selectedImageSize.width + columnGap)) + (columnGap * (i + 1)),
-            (j * (selectedImageSize.height + rowGap)) + rowGap,
-            selectedImageSize.width,
-            selectedImageSize.height
-          );
+        newWidth = selectedImageSize.width;
+        newHeight = (inputImage.naturalHeight / inputImage.naturalWidth) * selectedImageSize.width;
+        x = 0;
+        y = -((newHeight / 2) - (selectedImageSize.height / 2));
+        if (newHeight < selectedImageSize.height) {
+          newWidth = (inputImage.naturalWidth / inputImage.naturalHeight) * selectedImageSize.height;
+          newHeight = selectedImageSize.height;
+          x = -((newWidth / 2) - (selectedImageSize.width / 2));
+          y = 0;
         }
+
+        inputImageCanvas.width = selectedImageSize.width;
+        inputImageCanvas.height = selectedImageSize.height;
+        inputImageCtx.filter = `
+          brightness(${image.brightness}%)
+          contrast(${image.contrast}%)
+          saturate(${image.saturate}%)
+          grayscale(${image.grayscale})
+          sepia(${image.sepia}%)
+          hue-rotate(${image.hueRotate}deg)
+        `
+        inputImageCtx.drawImage(inputImage, x, y, newWidth, newHeight);
+        if (isBordered) { // Add border to the image
+          let borderWidth = 5; // Border width (px)
+
+          // Adjust border width according to the size of the image
+          if ((selectedImageSize.width < 10) || (selectedImageSize.height < 10)) borderWidth = 0;
+          else if ((selectedImageSize.width < 30) || (selectedImageSize.height < 30)) borderWidth = 1;
+
+          const borderedInputImageCanvas = document.createElement('canvas');
+          const borderedInputImageCtx = borderedInputImageCanvas.getContext('2d');
+          borderedInputImageCanvas.width = selectedImageSize.width;
+          borderedInputImageCanvas.height = selectedImageSize.height;
+          borderedInputImageCtx.fillStyle = 'black';
+          borderedInputImageCtx.fillRect(0, 0, borderedInputImageCanvas.width, borderedInputImageCanvas.height);
+
+          borderedInputImageCtx.drawImage(
+            inputImageCanvas,
+            borderWidth,
+            borderWidth,
+            selectedImageSize.width - (borderWidth * 2),
+            selectedImageSize.height - (borderWidth * 2)
+          );
+
+          inputImageCtx.drawImage(borderedInputImageCanvas, 0, 0, selectedImageSize.width, selectedImageSize.height);
+        }
+
+        // Draw the input image on the result canvas
+        for (let i = 0; i < noOfColumns; i++) {
+          for (let j = 0; j < noOfRows; j++) {
+            resultImageCtx.drawImage(
+              inputImageCanvas,
+              (i * (selectedImageSize.width + columnGap)) + (columnGap * (i + 1)),
+              (j * (selectedImageSize.height + rowGap)) + rowGap,
+              selectedImageSize.width,
+              selectedImageSize.height
+            );
+          }
+        }
+        setResultImage(resultImageCanvas.toDataURL('image/png'));
+        generatingResultFlag.current = false;
+        setIsDownloadDisabled(false);
+        setIsResultLoading(false);
       }
-      setResultImage(resultImageCanvas.toDataURL('image/png'));
-      setIsDownloadDisabled(false);
+      inputImage.src = imageUrl;
+    } catch (error) {
+      // console.error("Error applying changes to image: ", error);
+      generateResultImage.current = false;
       setIsResultLoading(false);
     }
-    inputImage.src = image.imageUrl;
+
   }
   const downloadImage = () => {
     if (!resultImage) return;
@@ -394,6 +416,8 @@ function App() {
   const [isRedoDisabled, setIsRedoDisabled] = useState(true);
   const [isUserCropping, setIsUserCropping] = useState(false);
   const [isUserAddingFilters, setIsUserAddingFilters] = useState(false);
+  const [areChangesBeingApplied, setAreChangesBeingApplied] = useState(false);
+  const generatingResultFlag = useRef(false);
 
   // Required variables and constants
   //? Maybe move these to a separate file
@@ -406,7 +430,7 @@ function App() {
 
   const editHistory = useRef([]);
   const editHistoryIndex = useRef(-1);
-  const didARedo = useRef(false);
+  const redoFlag = useRef(false);
   const historyLimit = 10;
 
   function objectsAreEqual(obj1, obj2) {
@@ -510,20 +534,20 @@ function App() {
     setIsGenerateDisabled(false);
 
     // Add the current image to the edit history
-    if (!objectsAreEqual(editHistory.current[editHistoryIndex.current], image)) {
+    if ((!objectsAreEqual(editHistory.current[editHistoryIndex.current], image)) && (!areChangesBeingApplied)) {
       if (editHistoryIndex.current === (editHistory.current.length - 1)) { // If user had not done undo before making a new change
         // If the current image is not the last image in the history, add it to the history
         editHistory.current.push({ ...image });
         editHistoryIndex.current = editHistory.current.length - 1;
       }
-      else if (!didARedo.current) { // If user had done undo before making a new change, also had NOT done a redo after that
+      else if (!redoFlag.current) { // If user had done undo before making a new change, also had NOT done a redo after that
         // If the current image is not the last image in the history, remove all the images after the current image and add the current image to the history
         // This is done to remove the forward history when a new change is made after undoing some changes
         editHistory.current.splice(editHistoryIndex.current + 1, editHistory.current.length - editHistoryIndex.current, { ...image });
         editHistoryIndex.current = editHistory.current.length - 1;
       }
       // Reset the redo flag
-      didARedo.current = false;
+      redoFlag.current = false;
     }
     //Limit the history to 10 images
     if (editHistory.current.length > historyLimit) {
@@ -533,64 +557,89 @@ function App() {
     // Enable/Disable undo and redo buttons
     setIsUndoDisabled(editHistoryIndex.current === 0);
     setIsRedoDisabled(editHistoryIndex.current === (editHistory.current.length - 1));
+
+    setAreChangesBeingApplied(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [image])
 
-  function applyChangesToImage() {
-    if (!image.imageUrl) return;
-    if (image.rotate === 0 && image.verticalScale === 1 && image.horizontalScale === 1) return;
+  // This is for testing purposes
+  // useEffect(() => {
+  //   console.log('eflag changed to: ', areChangesBeingApplied);
+  // }, [areChangesBeingApplied])
+  // useEffect(()=>{
+  //   console.log(generatingResultFlag.current);
+  // }, [generatingResultFlag.current])
 
+
+  async function applyChangesToImage() {
+    if (!image.imageUrl) return;
+    if ((!generatingResultFlag.current) && (image.rotate === 0) && (image.verticalScale === 1) && (image.horizontalScale === 1)) return;
+    setAreChangesBeingApplied(true);
+
+    let canvasDataUrl;
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.fillStyle = 'black';
 
     const img = new Image();
     img.src = image.imageUrl;
-    img.onload = () => {
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
 
-      if (image.rotate !== 0) {
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        if ((image.rotate / 90) % 2 !== 0) {
-          canvas.width = img.naturalHeight;
-          canvas.height = img.naturalWidth;
-          ctx.translate(img.naturalHeight / 2, img.naturalWidth / 2);
-          ctx.rotate(image.rotate * Math.PI / 180);
-          ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2, img.naturalWidth, img.naturalHeight);
+    // must use await here to wait for the image to load
+    await new Promise((resolve, reject) => {
+      img.onload = () => {
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
+
+        if (image.rotate === 0 && image.verticalScale === 1 && image.horizontalScale === 1) {
+          canvasDataUrl = canvas.toDataURL('image/png');
+          resolve();
         }
-        else {
-          ctx.translate(img.naturalWidth / 2, img.naturalHeight / 2);
-          ctx.rotate(image.rotate * Math.PI / 180);
-          ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2, img.naturalWidth, img.naturalHeight);
+
+        if (image.rotate !== 0) {
+          if ((image.rotate / 90) % 2 !== 0) {
+            canvas.width = img.naturalHeight;
+            canvas.height = img.naturalWidth;
+            ctx.translate(img.naturalHeight / 2, img.naturalWidth / 2);
+            ctx.rotate(image.rotate * Math.PI / 180);
+            ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2, img.naturalWidth, img.naturalHeight);
+          }
+          else {
+            ctx.translate(img.naturalWidth / 2, img.naturalHeight / 2);
+            ctx.rotate(image.rotate * Math.PI / 180);
+            ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2, img.naturalWidth, img.naturalHeight);
+          }
         }
+        if (image.verticalScale !== 1) {
+          ctx.translate(0, img.naturalHeight);
+          ctx.scale(1, -1);
+          ctx.drawImage(img,
+            image.rotate !== 0 ? -img.naturalWidth / 2 : 0,
+            image.rotate !== 0 ? img.naturalHeight / 2 : 0,
+            img.naturalWidth,
+            img.naturalHeight);
+        }
+        if (image.horizontalScale !== 1) {
+          ctx.translate(img.naturalWidth, 0);
+          ctx.scale(-1, 1);
+          ctx.drawImage(img,
+            image.rotate !== 0 ? img.naturalWidth / 2 : 0,
+            image.rotate !== 0 ? -img.naturalHeight / 2 : 0,
+            img.naturalWidth,
+            img.naturalHeight);
+        }
+        canvasDataUrl = canvas.toDataURL('image/png');
+        setImage({
+          ...image,
+          imageUrl: canvasDataUrl,
+          rotate: image.rotate !== 0 ? 0 : image.rotate,
+          verticalScale: image.verticalScale !== 1 ? 1 : image.verticalScale,
+          horizontalScale: image.horizontalScale !== 1 ? 1 : image.horizontalScale,
+        });
+        resolve();
       }
-      if (image.verticalScale !== 1) {
-        ctx.translate(0, img.naturalHeight);
-        ctx.scale(1, -1);
-        ctx.drawImage(img,
-          image.rotate !==0 ? -img.naturalWidth/2 : 0,
-          image.rotate !==0 ? img.naturalHeight/2 : 0,
-          img.naturalWidth,
-          img.naturalHeight);
-      }
-      if (image.horizontalScale !== 1) {
-        ctx.translate(img.naturalWidth, 0);
-        ctx.scale(-1, 1);
-        ctx.drawImage(img,
-          image.rotate !==0 ? img.naturalWidth/2 : 0,
-          image.rotate !==0 ? -img.naturalHeight/2 : 0,
-          img.naturalWidth,
-          img.naturalHeight);
-      }
-      setImage({
-        ...image,
-        imageUrl: canvas.toDataURL('image/png'),
-        rotate: image.rotate !== 0 ? 0 : image.rotate,
-        verticalScale: image.verticalScale !== 1 ? 1 : image.verticalScale,
-        horizontalScale: image.horizontalScale !== 1 ? 1 : image.horizontalScale,
-      });
-    }
+      img.onerror = reject;
+    });
+    return canvasDataUrl;
   }
 
   return (
@@ -610,10 +659,11 @@ function App() {
         setIsUserCropping={setIsUserCropping}
         editHistory={editHistory}
         editHistoryIndex={editHistoryIndex}
-        didARedo={didARedo}
+        redoFlag={redoFlag}
         isUndoDisabled={isUndoDisabled}
         isRedoDisabled={isRedoDisabled}
         applyChangesToImage={applyChangesToImage}
+        areChangesBeingApplied={areChangesBeingApplied}
       />
 
       <ImageSection
@@ -643,6 +693,7 @@ function App() {
         cmToPx={cmToPx}
         inchToPx={inchToPx}
         applyChangesToImage={applyChangesToImage}
+        generatingResultFlag={generatingResultFlag}
       />
 
       <ThemeSwitchButton />

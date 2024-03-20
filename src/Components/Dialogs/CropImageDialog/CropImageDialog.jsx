@@ -17,10 +17,10 @@ import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog.jsx';
 // ...
 // n. Finally crop the image
 
-function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSelectedImageSize, setIsUserCropping, isUserCropping, imageSizes }) {
-  const imageSizeHandle = (e) => {
-    setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
-  }
+function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSelectedImageSize, setIsUserCropping, isUserCropping, imageSizes, areChangesBeingApplied }) {
+  // const imageSizeHandle = (e) => {
+  //   setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
+  // }
   // ========== DOM references ==========
   // References to the image and canvas elements
   const cropImageRef = useRef(null);
@@ -375,6 +375,7 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
 
   return (
     <dialog className='dialog crop-dialog' ref={referrer}>
+      {areChangesBeingApplied ? <div className='dialog-loading-overlay'>Loading...</div> : <></>}
       <div className='crop-dialog-body'>
         {/* <div className='crop-image-controls'>
           <div className='crop-image-control image-size-selector-container'>
@@ -443,13 +444,20 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
         </div>
       </div>
       <div className='dialog-buttons crop-dialog-buttons'>
-        <button className='dialog-button cancel-button' onClick={() => { cancelCropDialogRef.current.showModal() }} autoFocus>
+        <button className='dialog-button cancel-button' disabled={areChangesBeingApplied} onClick={cancelCropOnConfirm} autoFocus>
           Cancel
         </button>
-        <button className='dialog-button confirm-button' onClick={() => { confirmCropDialogRef.current.showModal() }}>
+        <button className='dialog-button confirm-button' disabled={areChangesBeingApplied} onClick={confirmCropOnConfirm}>
           Confirm
         </button>
+        {/* <button className='dialog-button cancel-button' disabled={areChangesBeingApplied} onClick={() => { cancelCropDialogRef.current.showModal() }} autoFocus>
+          Cancel
+        </button>
+        <button className='dialog-button confirm-button' disabled={areChangesBeingApplied} onClick={() => { confirmCropDialogRef.current.showModal() }}>
+          Confirm
+        </button> */}
       </div>
+      {/* //! Keeping these here for now, will remove some time later */}
       <ConfirmationDialog
         referrer={cancelCropDialogRef}
         title='Cancel crop?'

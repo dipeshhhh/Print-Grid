@@ -17,7 +17,7 @@ import ColorLensIcon from '@mui/icons-material/ColorLens';
 // How to fix this bug:
 // The bug is caused by the fact that the input range value is not being updated when the reset button is clicked. This is because the input range value is being set to the value of the image object and not the value of the input range. To fix this, the input range value should be set to the value of the input range and not the value of the image object.
 
-function FiltersDialog({ referrer, isUserAddingFilters, setIsUserAddingFilters, image, setImage }) {
+function FiltersDialog({ referrer, isUserAddingFilters, setIsUserAddingFilters, image, setImage, areChangesBeingApplied }) {
   const previewImageRef = useRef(null);
   const [previewImage, setPreviewImage] = useState(null);
   const onClose = () => { setIsUserAddingFilters(false) };
@@ -52,6 +52,7 @@ function FiltersDialog({ referrer, isUserAddingFilters, setIsUserAddingFilters, 
 
   return (
     <dialog className="dialog filter-dialog" ref={referrer} style={isUserAddingFilters ? { display: 'flex' } : {}} >
+      {areChangesBeingApplied ? <div className='dialog-loading-overlay'>Loading...</div>:<></>}
       <section className='dialog-text'>
         <h5 className='dialog-title'>Filters</h5>
       </section>
@@ -119,8 +120,8 @@ function FiltersDialog({ referrer, isUserAddingFilters, setIsUserAddingFilters, 
         </main>
       }
       <section className='dialog-buttons filter-dialog-buttons'>
-        <button className='dialog-button cancel-button' onClick={closeDialog} autoFocus>Cancel</button>
-        <button className='dialog-button confirm-button' onClick={confirmDialog}>Apply</button>
+        <button className='dialog-button cancel-button' onClick={closeDialog} autoFocus disabled={areChangesBeingApplied}>Cancel</button>
+        <button className='dialog-button confirm-button' onClick={confirmDialog} disabled={areChangesBeingApplied}>Apply</button>
       </section>
     </dialog>
   )
