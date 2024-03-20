@@ -403,7 +403,7 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
                 style={{
                   transform: `
                   rotate(${image.rotate}deg)
-                  scale(${image.verticalScale}, ${image.horizontalScale})
+                  scale(${image.horizontalScale}, ${image.verticalScale})
                 `,
                   filter: `
                   brightness(${image.brightness}%)

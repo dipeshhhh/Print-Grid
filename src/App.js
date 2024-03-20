@@ -20,9 +20,7 @@ import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-// function applyChangesToImage(){}
-
-function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize, isUserAddingFilters, setIsUserAddingFilters, isUserCropping, setIsUserCropping, editHistory, editHistoryIndex, didARedo, isUndoDisabled, isRedoDisabled }) {
+function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize, isUserAddingFilters, setIsUserAddingFilters, isUserCropping, setIsUserCropping, editHistory, editHistoryIndex, didARedo, isUndoDisabled, isRedoDisabled, applyChangesToImage }) {
   const cropImageDialogRef = useRef(null);
   const confirmNewImageDialogRef = useRef(null);
   const filterDialogRef = useRef(null);
@@ -35,12 +33,12 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
     }
   }
   const uploadNewImage = () => { inputRef.current.click(); }
-  const flipHorizontal = () => { setImage({ ...image, verticalScale: image.verticalScale === 1 ? -1 : 1 }) }
-  const flipVertical = () => { setImage({ ...image, horizontalScale: image.horizontalScale === 1 ? -1 : 1 }) }
+  const flipHorizontal = () => { setImage({ ...image, horizontalScale: image.horizontalScale === 1 ? -1 : 1 }) }
+  const flipVertical = () => { setImage({ ...image, verticalScale: image.verticalScale === 1 ? -1 : 1 }) }
   const rotateClockwise = () => { setImage({ ...image, rotate: image.rotate + 90 }) }
   const rotateAntiClockwise = () => { setImage({ ...image, rotate: image.rotate - 90 }) }
   const filters = () => { filterDialogRef.current.showModal(); setIsUserAddingFilters(true); }
-  const crop = () => { cropImageDialogRef.current.showModal(); setIsUserCropping(true); }
+  const crop = () => { applyChangesToImage(); cropImageDialogRef.current.showModal(); setIsUserCropping(true); }
   const undo = () => {
     if (editHistoryIndex.current > 0) {
       setImage({ ...editHistory.current[--editHistoryIndex.current] });
@@ -66,17 +64,6 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
       horizontalScale: 1,
     });
   }
-  // const buttons = [
-  //   { icon: <SwapVertIcon />, text: 'Flip left', onClickFunction: flipVertical },
-  //   { icon: <SwapHorizIcon />, text: 'Flip right', onClickFunction: flipHorizontal, },
-  //   { icon: <Rotate90DegreesCwIcon />, text: 'Rotate Clockwise', onClickFunction: rotateClockwise },
-  //   { icon: <Rotate90DegreesCcwIcon />, text: 'Rotate counter-clockwise', onClickFunction: rotateAntiClockwise },
-  //   { icon: <FilterAltIcon />, text: 'Filters', onClickFunction: filters },
-  //   { icon: <CropIcon />, text: 'Crop', onClickFunction: crop },
-  //   { icon: <UndoIcon />, text: 'Undo', onClickFunction: undo },
-  //   { icon: <RedoIcon />, text: 'Redo', onClickFunction: redo },
-  //   { icon: <RestoreIcon />, text: 'Reset', onClickFunction: reset },
-  // ];
   return (
     <section className='section edit-buttons-section'>
       <div className='topbar'>
@@ -89,30 +76,21 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
         />
       </div>
       <div className='sidebar'>
-        {/* {buttons.map(button => (
-          <EditButton
-            key={button.text}
-            icon={button.icon}
-            text={button.text}
-            onClickFunction={button.onClickFunction}
-            isEditDisabled={isEditDisabled}
-          />
-        ))} */}
         <EditButton
           icon={<SwapVertIcon />}
-          text='Flip left'
+          text='Flip vertical'
           onClickFunction={flipVertical}
           isEditDisabled={isEditDisabled}
         />
         <EditButton
           icon={<SwapHorizIcon />}
-          text='Flip right'
+          text='Flip horizontal'
           onClickFunction={flipHorizontal}
           isEditDisabled={isEditDisabled}
         />
         <EditButton
           icon={<Rotate90DegreesCwIcon />}
-          text='Rotate Clockwise'
+          text='Rotate clockwise'
           onClickFunction={rotateClockwise}
           isEditDisabled={isEditDisabled}
         />
@@ -238,7 +216,7 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef,
             style={{
               transform: `
                 rotate(${image.rotate}deg)
-                scale(${image.verticalScale}, ${image.horizontalScale})
+                scale(${image.horizontalScale}, ${image.verticalScale})
               `,
               filter: `
                 brightness(${image.brightness}%)
@@ -264,7 +242,7 @@ function ImageSection({ uploadImage, image, isBordered, setIsBordered, inputRef,
   )
 }
 
-function GenerateImage({ isGenerateDisabled, isBordered, setIsBordered, cmToPx, sheetSizes, setSheetSizes, selectedSheetSize, setSelectedSheetSize, image, selectedImageSize, inchToPx }) {
+function GenerateImage({ isGenerateDisabled, isBordered, setIsBordered, cmToPx, sheetSizes, setSheetSizes, selectedSheetSize, setSelectedSheetSize, image, selectedImageSize, inchToPx, applyChangesToImage }) {
   const [resultImage, setResultImage] = useState(null);
   const [isDownloadDisabled, setIsDownloadDisabled] = useState(true);
   const [isResultLoading, setIsResultLoading] = useState(false);
@@ -274,6 +252,7 @@ function GenerateImage({ isGenerateDisabled, isBordered, setIsBordered, cmToPx, 
   const generateResultImage = () => {
     if (!image.imageUrl) return;
     setIsResultLoading(true);
+    applyChangesToImage();
 
     const columnGap = 3; // Gap between images in a column (px)
     const rowGap = 30; // Gap between images in a row (px)
@@ -556,6 +535,64 @@ function App() {
     setIsRedoDisabled(editHistoryIndex.current === (editHistory.current.length - 1));
   }, [image])
 
+  function applyChangesToImage() {
+    if (!image.imageUrl) return;
+    if (image.rotate === 0 && image.verticalScale === 1 && image.horizontalScale === 1) return;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.fillStyle = 'black';
+
+    const img = new Image();
+    img.src = image.imageUrl;
+    img.onload = () => {
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
+
+      if (image.rotate !== 0) {
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if ((image.rotate / 90) % 2 !== 0) {
+          canvas.width = img.naturalHeight;
+          canvas.height = img.naturalWidth;
+          ctx.translate(img.naturalHeight / 2, img.naturalWidth / 2);
+          ctx.rotate(image.rotate * Math.PI / 180);
+          ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2, img.naturalWidth, img.naturalHeight);
+        }
+        else {
+          ctx.translate(img.naturalWidth / 2, img.naturalHeight / 2);
+          ctx.rotate(image.rotate * Math.PI / 180);
+          ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2, img.naturalWidth, img.naturalHeight);
+        }
+      }
+      if (image.verticalScale !== 1) {
+        ctx.translate(0, img.naturalHeight);
+        ctx.scale(1, -1);
+        ctx.drawImage(img,
+          image.rotate !==0 ? -img.naturalWidth/2 : 0,
+          image.rotate !==0 ? img.naturalHeight/2 : 0,
+          img.naturalWidth,
+          img.naturalHeight);
+      }
+      if (image.horizontalScale !== 1) {
+        ctx.translate(img.naturalWidth, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(img,
+          image.rotate !==0 ? img.naturalWidth/2 : 0,
+          image.rotate !==0 ? -img.naturalHeight/2 : 0,
+          img.naturalWidth,
+          img.naturalHeight);
+      }
+      setImage({
+        ...image,
+        imageUrl: canvas.toDataURL('image/png'),
+        rotate: image.rotate !== 0 ? 0 : image.rotate,
+        verticalScale: image.verticalScale !== 1 ? 1 : image.verticalScale,
+        horizontalScale: image.horizontalScale !== 1 ? 1 : image.horizontalScale,
+      });
+    }
+  }
+
   return (
     <div className='App'>
       <EditButtons
@@ -576,6 +613,7 @@ function App() {
         didARedo={didARedo}
         isUndoDisabled={isUndoDisabled}
         isRedoDisabled={isRedoDisabled}
+        applyChangesToImage={applyChangesToImage}
       />
 
       <ImageSection
@@ -604,6 +642,7 @@ function App() {
         selectedImageSize={selectedImageSize}
         cmToPx={cmToPx}
         inchToPx={inchToPx}
+        applyChangesToImage={applyChangesToImage}
       />
 
       <ThemeSwitchButton />

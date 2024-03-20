@@ -66,7 +66,7 @@ function FiltersDialog({ referrer, isUserAddingFilters, setIsUserAddingFilters, 
               style={{
                 transform: `
                   rotate(${previewImage.rotate}deg)
-                  scale(${previewImage.verticalScale}, ${previewImage.horizontalScale})
+                  scale(${image.horizontalScale}, ${image.verticalScale})
                 `,
                 filter: `
                   brightness(${previewImage.brightness}%)
