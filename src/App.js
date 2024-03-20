@@ -20,7 +20,7 @@ import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize, isUserAddingFilters, setIsUserAddingFilters, isUserCropping, setIsUserCropping, editHistory, editHistoryIndex, redoFlag, isUndoDisabled, isRedoDisabled, applyChangesToImage, areChangesBeingApplied }) {
+function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, selectedImageSize, setSelectedImageSize, isUserAddingFilters, setIsUserAddingFilters, isUserCropping, setIsUserCropping, editHistory, editHistoryIndex, redoFlag, isUndoDisabled, isRedoDisabled, applyChangesToImage, areChangesBeingApplied, originalImageBackup }) {
   const cropImageDialogRef = useRef(null);
   const confirmNewImageDialogRef = useRef(null);
   const filterDialogRef = useRef(null);
@@ -53,18 +53,7 @@ function EditButtons({ image, setImage, isEditDisabled, inputRef, imageSizes, se
     }
   }
   const reset = () => {
-    setImage({
-      imageUrl: image.imageUrl,
-      brightness: 100,
-      contrast: 100,
-      saturate: 100,
-      hueRotate: 0,
-      grayscale: 0,
-      sepia: 0,
-      rotate: 0,
-      verticalScale: 1,
-      horizontalScale: 1,
-    });
+    setImage({ ...originalImageBackup.current });
   }
   return (
     <section className='section edit-buttons-section'>
@@ -418,6 +407,7 @@ function App() {
   const [isUserAddingFilters, setIsUserAddingFilters] = useState(false);
   const [areChangesBeingApplied, setAreChangesBeingApplied] = useState(false);
   const generatingResultFlag = useRef(false);
+  const originalImageBackup = useRef(null);
 
   // Required variables and constants
   //? Maybe move these to a separate file
@@ -503,7 +493,7 @@ function App() {
       const img = new Image();
       img.src = imageUrl;
       img.onload = () => {
-        setImage({
+        const imageToSet = {
           imageUrl: imageUrl,
           brightness: 100,
           contrast: 100,
@@ -516,7 +506,9 @@ function App() {
           horizontalScale: 1,
           naturalHeight: img.naturalHeight,
           naturalWidth: img.naturalWidth
-        })
+        }
+        originalImageBackup.current = { ...imageToSet };
+        setImage({ ...imageToSet });
       }
       // URL.revokeObjectURL(imageUrl) // Free memory
     }
@@ -664,6 +656,7 @@ function App() {
         isRedoDisabled={isRedoDisabled}
         applyChangesToImage={applyChangesToImage}
         areChangesBeingApplied={areChangesBeingApplied}
+        originalImageBackup={originalImageBackup}
       />
 
       <ImageSection
