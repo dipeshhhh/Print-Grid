@@ -1,0 +1,47 @@
+:root {
+  --topbar-height: 25px;
+  --topbar-button-radius: var(--button-radius);
+  --section-radius: var(--container-radius);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-secondary);
+  border-radius: var(--section-radius);
+  max-height: calc(100vh - (var(--app-gap) * 2));
+}
+
+.topbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  height: var(--topbar-height);
+  gap: var(--app-gap);
+}
+
+.topbar-button {
+  min-width: var(--edit-button-section-width);
+  background-color: var(--primary);
+  color: var(--text);
+  border-radius: var(--topbar-button-radius);
+  border-width: 0px;
+  cursor: pointer;
+
+  transition: background-color 175ms;
+}
+
+.topbar-button:hover {
+  background-color: var(--primary-hover-dark);
+}
+
+.topbar-selector {
+  color: var(--text);
+  background-color: var(--background);
+  border-radius: var(--topbar-button-radius);
+  max-width: 200px;
+  border-width: 0px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  cursor: pointer;
+}

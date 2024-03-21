@@ -28,13 +28,15 @@ function CustomSizeDialog({ referrer, selectorRef, title, sizes, setSizes, selec
     const widthUnit = widthUnitRef.current.value;
     const heightUnit = heightUnitRef.current.value;
 
-    const unitConversionMap = {
+    const unitConversionMap = { // Convert to pixels
       'inch': inchToPx,
       'cm': cmToPx,
       'px': (val) => { return val }
     }
 
     if ((width === '' || height === '') || (Number.parseFloat(width) <= 0 || Number.parseFloat(height) <= 0)) {
+      //! For future: replace alert with a toast.
+      alert('Enter a valid number: width and height must be greater than 0');
       return;
     }
     else {
@@ -66,6 +68,7 @@ function CustomSizeDialog({ referrer, selectorRef, title, sizes, setSizes, selec
         <div className='dialog-text'>
           <h5 className='dialog-title'>{`${title}`}</h5>
           <form className='custom-image-size-inputs'>
+
             <div className='custom-image-size-input'>
               <label className='custom-image-size-input-label'>Width: </label>
               <input type='text' className='custom-image-size-input-input custom-image-width' onChange={validateNumber} ref={widthInputRef} />
@@ -75,6 +78,7 @@ function CustomSizeDialog({ referrer, selectorRef, title, sizes, setSizes, selec
                 <option value='px'>px</option>
               </select>
             </div>
+
             <div className='custom-image-size-input'>
               <label className='custom-image-size-input-label'>Height: </label>
               <input type='text' className='custom-image-size-input-input custom-image-height' onChange={validateNumber} ref={heightInputRef} />
@@ -84,6 +88,7 @@ function CustomSizeDialog({ referrer, selectorRef, title, sizes, setSizes, selec
                 <option value='px'>px</option>
               </select>
             </div>
+
           </form>
         </div>
         <div className='dialog-buttons'>
@@ -94,5 +99,17 @@ function CustomSizeDialog({ referrer, selectorRef, title, sizes, setSizes, selec
     </dialog>
   )
 }
+
+// CustomSizeDialog.propTypes = {
+//   referrer: React.PropTypes.object,
+//   selectorRef: React.PropTypes.object,
+//   title: React.PropTypes.string,
+//   sizes: React.PropTypes.array,
+//   setSizes: React.PropTypes.func,
+//   selectedSize: React.PropTypes.object,
+//   setSelectedSize: React.PropTypes.func,
+//   cmToPx: React.PropTypes.func,
+//   inchToPx: React.PropTypes.func
+// }
 
 export default CustomSizeDialog;

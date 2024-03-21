@@ -2,11 +2,15 @@ import React from 'react';
 import '../Dialog.css';
 import './ConfirmationDialog.css';
 
-function ConfirmationDialog({ referrer, title, message, cancelButtonText, confirmButtonText, onConfirm, onClose }) {
-  const closeDialog = onClose ? onClose : () => { referrer.current.close() }
-  const confirmDialog = onConfirm ? onConfirm : () => { referrer.current.close() }
-  const cancelBtnText = cancelButtonText ? cancelButtonText : 'Cancel';
-  const confirmBtnText = confirmButtonText ? confirmButtonText : 'Confirm';
+function ConfirmationDialog({
+  referrer,
+  title,
+  message,
+  cancelButtonText = 'Cancel',
+  confirmButtonText = 'Confirm',
+  onConfirm = () => { referrer.current.close() },
+  onClose = () => { referrer.current.close() }
+}) {
   return (
     <dialog className="dialog confirmation-dialog" ref={referrer}>
       <form method='dialog'>
@@ -15,12 +19,22 @@ function ConfirmationDialog({ referrer, title, message, cancelButtonText, confir
           <p className='dialog-message'>{message}</p>
         </div>
         <div className='dialog-buttons'>
-          <button className='dialog-button cancel-button' onClick={closeDialog} autoFocus>{cancelBtnText}</button>
-          <button className='dialog-button confirm-button' onClick={confirmDialog}>{confirmBtnText}</button>
+          <button className='dialog-button cancel-button' onClick={onClose} autoFocus>{cancelButtonText}</button>
+          <button className='dialog-button confirm-button' onClick={onConfirm}>{confirmButtonText}</button>
         </div>
       </form>
     </dialog>
   )
 }
+
+// ConfirmationDialog.propTypes = {
+//   referrer: PropTypes.object.isRequired,
+//   title: PropTypes.string.isRequired,
+//   message: PropTypes.string.isRequired,
+//   cancelButtonText: PropTypes.string,
+//   confirmButtonText: PropTypes.string,
+//   onConfirm: PropTypes.func,
+//   onClose: PropTypes.func
+// }
 
 export default ConfirmationDialog;

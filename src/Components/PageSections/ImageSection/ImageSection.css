@@ -1,0 +1,32 @@
+.image-section {
+  display: flex;
+  flex-grow: 1;
+}
+
+.image-section-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  overflow: overlay;
+  overflow-x: hidden;
+}
+
+.border-checkbox {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5ch;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: calc(100vh - 64px);
+  transition: all 150ms ease-in-out 0s;
+}
+
+.file-input-text-hidden {
+  width: var(--file-input-button-width);
+  overflow: hidden;
+}

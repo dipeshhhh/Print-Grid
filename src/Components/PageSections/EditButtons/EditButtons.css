@@ -1,0 +1,14 @@
+.edit-buttons-section {
+  display: flex;
+  flex-direction: column;
+  width: var(--edit-button-section-width);
+  gap: var(--app-gap);
+  background-color: var(--background);
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: var(--app-gap);
+}

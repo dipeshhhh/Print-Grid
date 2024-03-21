@@ -12,8 +12,7 @@ import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog.jsx';
 // 1. Fix hard-coded values (somewhere in the cropImageParent height element I think)
 // 2. Fix the known bugs
 // 3. Ability to change selected image size
-// 4. Ability to rotate the image
-// 5. Cropper eye level and face level guides
+// 4. Cropper eye level and face level guides
 // ...
 // n. Finally crop the image
 
@@ -26,7 +25,6 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
   const cropImageRef = useRef(null);
   const cropImageContainerRef = useRef(null);
   const cropperRef = useRef(null);
-  // const canvasRef = useRef(null);
   const confirmCropDialogRef = useRef(null);
   const cancelCropDialogRef = useRef(null);
 
@@ -36,9 +34,6 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
   const initialPointerPositionY = useRef(0);
   const isUserResizingCropper = useRef(false);
   const cropperResizerPosition = useRef(null);
-  // const isWindowHorizontal = (window.innerWidth / window.innerHeight) > 1;
-  // const dialogPadding = Number.parseInt(getComputedStyle(document.body).getPropertyValue('--dialog-padding').slice(0, -2));
-  // const originalImageAspectRatio = cropImageRef.current ? cropImageRef.current.width / cropImageRef.current.height : 'auto';
   let initialDistance = 0;
 
   // ========== Crop Cancel/Confirm ==========
@@ -67,10 +62,10 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
     newImage.src = image.imageUrl;
     newImage.onload = () => {
       const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d');
       canvas.width = selectedImageSize.width;
       canvas.height = selectedImageSize.height;
-      context.drawImage(
+      ctx.drawImage(
         newImage,
         (cropperInfo.left - imageInfo.left) / (imageInfo.width / newImage.width),
         (cropperInfo.top - imageInfo.top) / (imageInfo.height / newImage.height),
@@ -81,7 +76,6 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
         canvas.width,
         canvas.height
       );
-      // setImage({ ...image, imageUrl: canvas.toDataURL('image/png') });
       setImage({ ...image, imageUrl: canvas.toDataURL('image/png') });
       setIsUserCropping(false);
     }
@@ -110,13 +104,6 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
     // Change
     const dx = -(initialPointerPositionX.current - currentPointerPositionX);
     const dy = -(initialPointerPositionY.current - currentPointerPositionY);
-    // Moving relative to mouse position on image's top left corner
-    // const newPosX = (currentPointerPositionX - (window.innerWidth - (referrer.current.clientWidth - (dialogPadding*2)))/2);
-    // const newPosY = (currentPointerPositionY - (window.innerHeight - (referrer.current.clientHeight - (dialogPadding*2)))/2);
-    // Moving relative to mouse position on image's center
-    // const newPosX = (currentPointerPositionX - (window.innerWidth - (referrer.current.clientWidth - (dialogPadding*2)))/2) - (cropImageRef.current.width/2);
-    // const newPosY = (currentPointerPositionY - (window.innerHeight - (referrer.current.clientHeight - (dialogPadding*2)))/2) - (cropImageRef.current.height/2);
-    // Moving relative to mouse position anywhere on the image
     const newPosX = cropImageRef.current.offsetLeft + dx;
     const newPosY = cropImageRef.current.offsetTop + dy;
     if (checkBounds(
@@ -189,7 +176,6 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
     if (!e.isPrimary) return;
 
     const rect = cropperRef.current.getBoundingClientRect();
-    // const isImageHorizontal = (cropImageRef.current.clientWidth / cropImageRef.current.clientHeight) > (selectedImageSize.width / selectedImageSize.height);
     const checkBounds = (
       newPosX,
       newPosY,
@@ -330,19 +316,16 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
         initialPointerPositionX.current = e.clientX;
         initialPointerPositionY.current = e.clientY;
         pointersArray.push(e);
-        // Adding event listeners to the window so that the user can drag/zoom the image even if the mouse is not over the image
+        // Adding event listeners to the window so that the user can drag the image even if the mouse is not over the image
         if (pointersArray.length <= 1) window.addEventListener('pointermove', onDragCropImage);
         else if (pointersArray.length > 1) {
           window.removeEventListener('pointermove', onDragCropImage);
-          window.addEventListener('pointermove', onPinchZoomCropImage);
         }
-        // Removing event listeners when the user stops dragging the image
         window.addEventListener('pointerup', removeDragEventListeners);
       });
+      // Adding event listener to the image so that the user can zoom in and out using scroll
       cropImageRef.current.addEventListener('pointerenter', () => {
-        // Adding event listener to the image so that the user can zoom in and out
-        cropImageRef.current.addEventListener('wheel', onScrollZoomCropImage);
-        // Removing event listener when the pointer leaves the image
+        cropImageRef.current.addEventListener('wheel', onScrollZoomCropImage);        
         cropImageRef.current.addEventListener('pointerleave', () => {
           cropImageRef.current.removeEventListener('wheel', onScrollZoomCropImage);
         });
@@ -359,7 +342,6 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
         initialPointerPositionX.current = e.clientX;
         initialPointerPositionY.current = e.clientY;
 
-        // window.addEventListener('pointermove', onDragCropper);
         if (!isUserResizingCropper.current) window.addEventListener('pointermove', onDragCropper);
         else window.addEventListener('pointermove', onResizeCropper);
 
@@ -424,10 +406,6 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
                 className='cropper'
                 style={{
                   aspectRatio: `${selectedImageSize.width} / ${selectedImageSize.height}`,
-                  // height: (cropImageRef.current.clientWidth / cropImageRef.current.clientHeight) > (selectedImageSize.width / selectedImageSize.height) ? `${cropImageRef.current.height}px` : 'auto',
-                  // width: (cropImageRef.current.clientWidth / cropImageRef.current.clientHeight) > (selectedImageSize.width / selectedImageSize.height) ? 'auto' : `${cropImageRef.current.width}px`,
-                  // height: '50px',
-                  // width: '50px',
                   height: '51px',
                   width: `${(selectedImageSize.width / selectedImageSize.height) * 51}px`,
                   minHeight: '50px',
@@ -450,12 +428,6 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
         <button className='dialog-button confirm-button' disabled={areChangesBeingApplied} onClick={confirmCropOnConfirm}>
           Confirm
         </button>
-        {/* <button className='dialog-button cancel-button' disabled={areChangesBeingApplied} onClick={() => { cancelCropDialogRef.current.showModal() }} autoFocus>
-          Cancel
-        </button>
-        <button className='dialog-button confirm-button' disabled={areChangesBeingApplied} onClick={() => { confirmCropDialogRef.current.showModal() }}>
-          Confirm
-        </button> */}
       </div>
       {/* //! Keeping these here for now, will remove some time later */}
       <ConfirmationDialog
@@ -477,5 +449,17 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
     </dialog>
   )
 }
+
+// CropImageDialog.propType = {
+//   referrer: PropTypes.object.isRequired,
+//   image: PropTypes.object.isRequired,
+//   setImage: PropTypes.func.isRequired,
+//   selectedImageSize: PropTypes.object.isRequired,
+//   setSelectedImageSize: PropTypes.func.isRequired,
+//   setIsUserCropping: PropTypes.func.isRequired,
+//   isUserCropping: PropTypes.bool.isRequired,
+//   imageSizes: PropTypes.array.isRequired,
+//   areChangesBeingApplied: PropTypes.bool.isRequired,
+// }
 
 export default CropImageDialog;

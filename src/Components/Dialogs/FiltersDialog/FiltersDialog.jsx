@@ -9,13 +9,29 @@ import ContrastIcon from '@mui/icons-material/Contrast';
 import OpacityIcon from '@mui/icons-material/Opacity';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
-// import RestoreIcon from '@mui/icons-material/Restore'
+import RestoreIcon from '@mui/icons-material/Restore'
 
 //! Known Bugs:
 // On clicking the reset button, everything works fine but the contrast range input does not reset to 100 yet the contrast resets to 100.
 
-// How to fix this bug:
-// The bug is caused by the fact that the input range value is not being updated when the reset button is clicked. This is because the input range value is being set to the value of the image object and not the value of the input range. To fix this, the input range value should be set to the value of the input range and not the value of the image object.
+function FilterRangeInput({ icon, label, min, max, value, onChange }) {
+  return (
+    <div className='filters-adjustment-item'>
+      <span className='filter-adjustment-label'>{icon} {label}</span>
+      <input className='filter-adjustment-input' type='range' min={min} max={max} value={value} onChange={onChange} />
+      <input className='filter-adjustment-input filter-adjustment-number-input' type='number' min={min} max={max} value={value} onChange={onChange} />
+    </div>
+  )
+}
+
+function FilterCheckboxInput({ icon, label, checked, onChange }) {
+  return (
+    <div className='filters-adjustment-item'>
+      <span className='filter-adjustment-label'>{icon} {label}</span>
+      <input className='filter-adjustment-input' type='checkbox' checked={checked} onChange={onChange} />
+    </div>
+  )
+}
 
 function FiltersDialog({ referrer, isUserAddingFilters, setIsUserAddingFilters, image, setImage, areChangesBeingApplied }) {
   const previewImageRef = useRef(null);
@@ -48,11 +64,23 @@ function FiltersDialog({ referrer, isUserAddingFilters, setIsUserAddingFilters, 
   const setSaturate = (e) => { setPreviewImage({ ...previewImage, saturate: e.target.value }) }
   const setSepia = (e) => { setPreviewImage({ ...previewImage, sepia: e.target.value }) }
   const setHueRotate = (e) => { setPreviewImage({ ...previewImage, hueRotate: e.target.value }) }
-  // const resetFilters = () => { setPreviewImage({ ...image }) }
+  const resetFilters = () => { setPreviewImage({ ...image }) }
+
+  const filterRangeAdjustments = [
+    { icon: <BrightnessMediumIcon />, label: 'Brightness:', min: 0, max: 200, value: previewImage?.brightness, onChange: setBrightness },
+    { icon: <ContrastIcon />, label: 'Contrast:', min: 0, max: 200, value: previewImage?.contrast, onChange: setContrast },
+    { icon: <OpacityIcon />, label: 'Saturate:', min: 0, max: 200, value: previewImage?.saturate, onChange: setSaturate },
+    { icon: <WhatshotIcon />, label: 'Sepia:', min: 0, max: 100, value: previewImage?.sepia, onChange: setSepia },
+    { icon: <ColorLensIcon />, label: 'Hue:', min: 0, max: 360, value: previewImage?.hueRotate, onChange: setHueRotate },
+  ]
+
+  const filterChecboxAdjustments = [
+    { icon: <FilterBAndWIcon />, label: 'Grayscale', checked: previewImage?.grayscale === 1, onChange: grayscale }
+  ]
 
   return (
     <dialog className="dialog filter-dialog" ref={referrer} style={isUserAddingFilters ? { display: 'flex' } : {}} >
-      {areChangesBeingApplied ? <div className='dialog-loading-overlay'>Loading...</div>:<></>}
+      {areChangesBeingApplied ? <div className='dialog-loading-overlay'>Loading...</div> : <></>}
       <section className='dialog-text'>
         <h5 className='dialog-title'>Filters</h5>
       </section>
@@ -81,40 +109,33 @@ function FiltersDialog({ referrer, isUserAddingFilters, setIsUserAddingFilters, 
             />
           </section>
           <section className='filters-adjustment-section'>
-
             <section className='filter-adjustment-items'>
-              <div className='filters-adjustment-item'>
-                <span className='filter-adjustment-label'><BrightnessMediumIcon />Brightness:</span>
-                <input className='filter-adjustment-input' type='range' min="0" max="200" value={previewImage.brightness} onChange={setBrightness} />
-                <input className='filter-adjustment-input filter-adjustment-number-input' type='number' min="1" max="200" value={previewImage.brightness} onChange={setBrightness} />
-              </div>
-              <div className='filters-adjustment-item'>
-                <span className='filter-adjustment-label'><ContrastIcon />Contrast:</span>
-                <input className='filter-adjustment-input' type='range' min="0" max="200" value={previewImage.constrast} onChange={setContrast} />
-                <input className='filter-adjustment-input filter-adjustment-number-input' type='number' min="1" max="200" value={previewImage.contrast} onChange={setContrast} />
-              </div>
-              <div className='filters-adjustment-item'>
-                <span className='filter-adjustment-label'><OpacityIcon />Saturate:</span>
-                <input className='filter-adjustment-input' type='range' min="0" max="200" value={previewImage.saturate} onChange={setSaturate} />
-                <input className='filter-adjustment-input filter-adjustment-number-input' type='number' min="0" max="200" value={previewImage.saturate} onChange={setSaturate} />
-              </div>
-              <div className='filters-adjustment-item'>
-                <span className='filter-adjustment-label'><WhatshotIcon />Sepia:</span>
-                <input className='filter-adjustment-input' type='range' min="0" max="100" value={previewImage.sepia} onChange={setSepia} />
-                <input className='filter-adjustment-input filter-adjustment-number-input' type='number' min="0" max="100" value={previewImage.sepia} onChange={setSepia} />
-              </div>
-              <div className='filters-adjustment-item'>
-                <span className='filter-adjustment-label'><ColorLensIcon />Hue:</span>
-                <input className='filter-adjustment-input' type='range' min="0" max="360" value={previewImage.hueRotate} onChange={setHueRotate} />
-                <input className='filter-adjustment-input filter-adjustment-number-input' type='number' min="0" max="360" value={previewImage.hueRotate} onChange={setHueRotate} />
-              </div>
-              <div className='filters-adjustment-item'>
-                <span className='filter-adjustment-label'><FilterBAndWIcon />Grayscale:</span>
-                <input className='filter-adjustment-input' type='checkbox' checked={previewImage.grayscale === 1} onChange={grayscale} />
-              </div>
+              {
+                filterRangeAdjustments.map((filterRangeAdjustment) => (
+                  <FilterRangeInput
+                    key={filterRangeAdjustment.label}
+                    icon={filterRangeAdjustment.icon}
+                    label={filterRangeAdjustment.label}
+                    min={filterRangeAdjustment.min}
+                    max={filterRangeAdjustment.max}
+                    value={filterRangeAdjustment.value}
+                    onChange={filterRangeAdjustment.onChange}
+                  />
+                ))
+              }
+              {
+                filterChecboxAdjustments.map((filterCheckboxAdjustment) => (
+                  <FilterCheckboxInput
+                    key={filterCheckboxAdjustment.label}
+                    icon={filterCheckboxAdjustment.icon}
+                    label={filterCheckboxAdjustment.label}
+                    checked={filterCheckboxAdjustment.checked}
+                    onChange={filterCheckboxAdjustment.onChange}
+                  />
+                ))
+              }
               <div className='empty-gap'></div>
-              {/* Will implement this one later (doesn't look great on the layout so I removed it for now) */}
-              {/* <button className='edit-button filter-reset-button' onClick={resetFilters}><RestoreIcon /> Reset</button> */}
+              <button className='dialog-button  filter-reset-button' onClick={resetFilters}><RestoreIcon />Reset</button>
             </section>
           </section>
         </main>
@@ -126,5 +147,30 @@ function FiltersDialog({ referrer, isUserAddingFilters, setIsUserAddingFilters, 
     </dialog>
   )
 }
+
+// FilterRangeInput.propTypes = {
+//   icon: PropTypes.element.isRequired,
+//   label: PropTypes.string.isRequired,
+//   min: PropTypes.number.isRequired,
+//   max: PropTypes.number.isRequired,
+//   value: PropTypes.number.isRequired,
+//   onChange: PropTypes.func.isRequired,
+// }
+
+// FilterCheckboxInput.propTypes = {
+//   icon: PropTypes.element.isRequired,
+//   label: PropTypes.string.isRequired,
+//   checked: PropTypes.bool.isRequired,
+//   onChange: PropTypes.func.isRequired,
+// }
+
+// FiltersDialog.propTypes = {
+//   referrer: PropTypes.object.isRequired,
+//   isUserAddingFilters: PropTypes.bool.isRequired,
+//   setIsUserAddingFilters: PropTypes.func.isRequired,
+//   image: PropTypes.object.isRequired,
+//   setImage: PropTypes.func.isRequired,
+//   areChangesBeingApplied: PropTypes.bool.isRequired,
+// }
 
 export default FiltersDialog;

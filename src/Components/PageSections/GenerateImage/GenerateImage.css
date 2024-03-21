@@ -1,0 +1,17 @@
+.generate-image-section {
+  display: flex;
+  flex-grow: 1;
+}
+
+.generate-image-section-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.result-image{
+  max-width: 100%;
+  max-height: calc( 100vh - 64px );
+  /* max-height: 100%; */
+}

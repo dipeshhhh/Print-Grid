@@ -80,7 +80,7 @@
   background-color: var(--background);
   color: var(--text);
   border: none;
-  border-radius: 5px;
+  border-radius: var(--button-radius);
   padding: 0.5ch 1ch;
 }
 
@@ -95,5 +95,5 @@
   align-items: center;
   justify-self: end;
   align-self: flex-start;
-  padding: 1ch 2ch;
+  transform: scale(0.9) translateX(-4px);
 }

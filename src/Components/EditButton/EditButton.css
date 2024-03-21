@@ -1,3 +1,7 @@
+:root {
+  --edit-button-radius: var(--button-radius);
+}
+
 .edit-button {
   height: var(--edit-button-section-width);
   background-color: var(--secondary);
@@ -9,7 +13,7 @@
   transition: background-color 175ms;
 }
 
-.edit-button:hover{
+.edit-button:hover {
   background-color: var(--secondary-hover-dark);
 }
 
