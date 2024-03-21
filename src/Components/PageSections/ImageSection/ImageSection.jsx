@@ -1,9 +1,10 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import '../PageSections.css';
 import './ImageSection.css';
 
 // Components
 import CustomSizeDialog from '../../Dialogs/CustomSizeDialog/CustomSizeDialog.jsx';
+import ConfirmationDialog from '../../Dialogs/ConfirmationDialog/ConfirmationDialog.jsx';
 
 function ImageSection({
   uploadImage,
@@ -15,11 +16,14 @@ function ImageSection({
   setImageSizes,
   selectedImageSize,
   setSelectedImageSize,
-  
+
   // Prop drilling
   cmToPx,
   inchToPx
 }) {
+  const [isUserDroppingImage, setIsUserDroppingImage] = useState(false);
+  const newUploadFiles = useRef(null);
+  const confirmNewUploadRef = useRef(null);
   const customImageSizeDialogRef = useRef(null);
   const imageSizeSelectorRef = useRef(null);
 
@@ -28,6 +32,28 @@ function ImageSection({
     if (e.target.value !== 'custom') setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
     else customImageSizeDialogRef.current.showModal();
   }
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsUserDroppingImage(true);
+  }
+  const handleDrop = (e) => {
+    e.preventDefault();
+    // since upload image expects e.target.files
+    const files = { target: { files: e.dataTransfer.files } };
+    if (!image.imageUrl) {
+      uploadImage(files);
+    }
+    else {
+      newUploadFiles.current = files;
+      confirmNewUploadRef.current.showModal();
+    }
+    setIsUserDroppingImage(false);
+  }
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsUserDroppingImage(false)
+  };
 
   // Hide the file input when an image is uploaded to show the preview.
   // Can't hide the input using 'display: none', 'visibility: hidden', or 'opacity: 0' because it will prevent the file input from working.
@@ -70,7 +96,19 @@ function ImageSection({
           <label htmlFor='border-check'>Border</label>
         </span>
       </div>
-      <div className='image-section-main' onDrop={uploadImage}>
+      <div
+        className='image-section-main'
+        onDragOver={handleDragOver}
+      >
+        {isUserDroppingImage &&
+          <div
+            className='drop-image-overlay'
+            onDrop={handleDrop}
+            onDragLeave={handleDragLeave}
+          >
+            <h4>Drop the image here</h4>
+          </div>
+        }
         {image.imageUrl &&
           <img
             className='image-preview'
@@ -92,13 +130,29 @@ function ImageSection({
             }}
           />
         }
+        {
+          (!image.imageUrl) && 
+          <button className='upload-image-button' onClick={()=>{inputRef.current.click();}}>
+          Click to Upload Image
+          </button>
+        }
         <input
           type='file'
-          className='file-input-text-hidden'
+          className='file-input-hidden'
           accept='image/*'
           ref={inputRef}
           style={image.imageUrl ? hiddenFileInputCss : {}}
           onChange={uploadImage}
+        />
+        <ConfirmationDialog
+          referrer={confirmNewUploadRef}
+          title='Open new image?'
+          message='This will discard all changes made to the current image.'
+          onConfirm={() => uploadImage(newUploadFiles.current)}
+          onClose={() => {
+            setIsUserDroppingImage(false);
+            confirmNewUploadRef.current.close();
+          }}
         />
       </div>
     </section>
