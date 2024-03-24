@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
+// Utils
+import { cmToPx, inchToPx } from './utils/converters.js';
+import { validateImageFiles, areObjectsDeepEqual } from './utils/helpers.js';
+import { INITIAL_IMAGE_SIZES, INITIAL_SHEET_SIZES, INITIAL_IMAGE_STATE } from './utils/initialValues.js';
+import { HISTORY_LIMIT } from './utils/configs.js';
+
 // Components
 import ThemeSwitchButton from './components/ThemeSwitchButton/ThemeSwitchButton.jsx';
 
@@ -8,48 +14,6 @@ import ThemeSwitchButton from './components/ThemeSwitchButton/ThemeSwitchButton.
 import EditButtons from './components/PageSections/EditButtons/EditButtons.jsx';
 import ImageSection from './components/PageSections/ImageSection/ImageSection.jsx';
 import GenerateImage from './components/PageSections/GenerateImage/GenerateImage.jsx';
-
-// Required variables/constants and helper functions
-//? Maybe move these to a separate file
-let currentDPI = 300;
-const INCH_TO_CM = 2.54;
-const INTEGER_ROUNDING_FACTOR = 2.54 / 2.5; /// Factor to round cm to px conversion, preserving aspect ratio.
-const inchToCm = (inch) => (inch * INCH_TO_CM);
-const cmToPx = (cm) => (((cm * currentDPI) / INCH_TO_CM) * INTEGER_ROUNDING_FACTOR);
-const inchToPx = (inch) => (cmToPx(inchToCm(inch)));
-const objectsAreEqual = (obj1, obj2) => {
-  if (!obj1 || !obj2) return false;
-  const keys1 = Object.keys(obj1);
-  const keys2 = Object.keys(obj2);
-  if (keys1.length !== keys2.length) {
-    return false;
-  }
-  for (let key of keys1) {
-    if (obj1[key] !== obj2[key]) {
-      return false;
-    }
-  }
-  return true;
-}
-const filesCheck = (files) => {
-  let result = true;
-  if (files && (files.length > 0)) {
-    for (let file of files) {
-      if (!(file.type.startsWith('image/'))) {
-        alert('Please select an image file.');
-        result = false;
-        break;
-      }
-      if (file.size > 50 * 1024 * 1024) { // file size should be less than 50MB
-        alert('File size should be less than 50MB');
-        result = false;
-        break;
-      }
-    };
-  }
-  else result = false;
-  return result;
-}
 
 function App() {
   // Input Referrer: for the file input element
@@ -60,7 +24,6 @@ function App() {
   const editHistory = useRef([]);
   const editHistoryIndex = useRef(-1);
   const redoFlag = useRef(false); // Flag to prevent adding duplicate entries in the history when redo is clicked after undo
-  const historyLimit = useRef(10);
 
   // Flags to prevent concurrent edits, multiple image generations on repeated clicks, and duplicate entries in the history while changes are being applied.
   const generatingResultFlag = useRef(false);
@@ -77,54 +40,14 @@ function App() {
   const [isRedoDisabled, setIsRedoDisabled] = useState(true);
 
   // Image and Sheet sizes in px
-  const [imageSizes, setImageSizes] = useState([
-    {
-      "name": '3cm x 4cm',
-      "width": cmToPx(2.95), // 0.05cm less than said size to preserve gap between images
-      "height": cmToPx(3.95), // same reason as above
-    },
-    {
-      "name": '3.5cm x 4.5cm',
-      "width": cmToPx(3.5),
-      "height": cmToPx(4.5),
-    },
-    {
-      "name": '2x2 inch (Indian passport)',
-      "width": inchToPx(2),
-      "height": inchToPx(2),
-    }
-  ])
-  const [sheetSizes, setSheetSizes] = useState([
-    {
-      "name": "A4",
-      "width": cmToPx(21),
-      "height": cmToPx(29.7)
-    },
-    {
-      "name": "A3",
-      "width": cmToPx(29.7),
-      "height": cmToPx(42)
-    }
-  ]);
+  const [imageSizes, setImageSizes] = useState([...INITIAL_IMAGE_SIZES]);
+  const [sheetSizes, setSheetSizes] = useState([...INITIAL_SHEET_SIZES]);
   const [selectedImageSize, setSelectedImageSize] = useState(imageSizes[0]);
   const [selectedSheetSize, setSelectedSheetSize] = useState(sheetSizes[0]);
 
   // Image
   const [isBordered, setIsBordered] = useState(false);
-  const [image, setImage] = useState({
-    imageUrl: false,
-    brightness: 100,
-    contrast: 100,
-    saturate: 100,
-    hueRotate: 0,
-    grayscale: 0,
-    sepia: 0,
-    rotate: 0,
-    verticalScale: 1,
-    horizontalScale: 1,
-    naturalHeight: false,
-    naturalWidth: false
-  });
+  const [image, setImage] = useState({ ...INITIAL_IMAGE_STATE });
 
   useEffect(() => {
     if (!image.imageUrl) {
@@ -136,7 +59,7 @@ function App() {
     setIsGenerateDisabled(false);
 
     // Add the current image to the edit history
-    if ((!objectsAreEqual(editHistory.current[editHistoryIndex.current], image)) && (!areChangesBeingApplied)) {
+    if ((!areObjectsDeepEqual(editHistory.current[editHistoryIndex.current], image)) && (!areChangesBeingApplied)) {
       if (editHistoryIndex.current === (editHistory.current.length - 1)) {
         // Add the current image to history if no undo operation was performed before the new change and if it's not the last image in history.
         editHistory.current.push({ ...image });
@@ -151,7 +74,7 @@ function App() {
       redoFlag.current = false;
     }
     // Applying history limit
-    if (editHistory.current.length > historyLimit.current) {
+    if (editHistory.current.length > HISTORY_LIMIT) {
       editHistory.current.shift();
       editHistoryIndex.current--;
     }
@@ -235,40 +158,9 @@ function App() {
     return canvasDataUrl;
   }
 
-  const uploadImage = (e) => {
-    if (filesCheck(e.target.files)) {
-      const imageUrl = URL.createObjectURL(e.target.files[0]);
-      const img = new Image();
-      img.src = imageUrl;
-      img.onload = () => {
-        const imageToSet = {
-          imageUrl: imageUrl,
-          brightness: 100,
-          contrast: 100,
-          saturate: 100,
-          hueRotate: 0,
-          grayscale: 0,
-          sepia: 0,
-          rotate: 0,
-          verticalScale: 1,
-          horizontalScale: 1,
-          naturalHeight: img.naturalHeight,
-          naturalWidth: img.naturalWidth
-        }
-        originalImageBackup.current = { ...imageToSet };
-        setImage({ ...imageToSet });
-      }
-      // URL.revokeObjectURL(imageUrl) // Free memory
-    }
-    // else {
-    //   alert('Please select an image file.')
-    // }
-  }
-
   return (
     <div className='App'>
       <EditButtons
-        uploadImage={uploadImage}
         image={image}
         setImage={setImage}
         isEditDisabled={isEditDisabled}
@@ -291,8 +183,8 @@ function App() {
       />
 
       <ImageSection
-        uploadImage={uploadImage}
         image={image}
+        setImage={setImage}
         isBordered={isBordered}
         setIsBordered={setIsBordered}
         inputRef={inputRef}
@@ -300,9 +192,7 @@ function App() {
         setImageSizes={setImageSizes}
         selectedImageSize={selectedImageSize}
         setSelectedImageSize={setSelectedImageSize}
-        cmToPx={cmToPx}
-        inchToPx={inchToPx}
-        filesCheck={filesCheck}
+        originalImageBackup={originalImageBackup}
       />
 
       <GenerateImage

@@ -2,6 +2,9 @@ import React, { useRef } from 'react';
 import '../Dialog.css';
 import './CustomSizeDialog.css';
 
+// Utils
+import { cmToPx, inchToPx } from '../../../utils/converters.js';
+
 // Helper function to validate input as a number
 const validateNumber = (e) => {
   const input = e.target;
@@ -31,7 +34,7 @@ function SizeInput({ label, inputRef, unitRef }) {
   )
 }
 
-function CustomSizeDialog({ referrer, selectorRef, title, sizes, setSizes, selectedSize, setSelectedSize, cmToPx, inchToPx }) {
+function CustomSizeDialog({ referrer, selectorRef, title, sizes, setSizes, selectedSize, setSelectedSize }) {
   const widthInputRef = useRef(null);
   const widthUnitRef = useRef(null);
   const heightInputRef = useRef(null);

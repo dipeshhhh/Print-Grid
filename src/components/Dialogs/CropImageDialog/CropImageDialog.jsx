@@ -325,7 +325,7 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
       });
       // Adding event listener to the image so that the user can zoom in and out using scroll
       cropImageRef.current.addEventListener('pointerenter', () => {
-        cropImageRef.current.addEventListener('wheel', onScrollZoomCropImage);        
+        cropImageRef.current.addEventListener('wheel', onScrollZoomCropImage);
         cropImageRef.current.addEventListener('pointerleave', () => {
           cropImageRef.current.removeEventListener('wheel', onScrollZoomCropImage);
         });
@@ -348,6 +348,27 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
         window.addEventListener('pointerup', removeDragEventListeners);
       })
     }
+
+    // if (cropImageRef.current && cropImageContainerRef) {
+    //   const cropImageWidth = image.naturalWidth;
+    //   const cropImageHeight = image.naturalHeight;
+    //   const cropImageParentWidth = cropImageContainerRef.current.clientWidth;
+    //   const cropImageParentHeight = cropImageContainerRef.current.clientHeight;
+    //   let newWidth, newHeight;
+
+    //   newWidth = cropImageParentWidth;
+    //   newHeight = (cropImageParentWidth / cropImageWidth) * cropImageHeight;
+    //   if (newHeight > cropImageParentHeight) {
+    //     newHeight = cropImageParentHeight;
+    //     newWidth = (cropImageParentHeight / cropImageHeight) * cropImageWidth;
+    //   }
+
+    //   cropImageRef.current.style.width = newHeight>newWidth ? 'auto' : '100%';
+    //   cropImageRef.current.style.height = newHeight>newWidth ? '100%' : 'auto';
+      // cropImageRef.current.setAttribute('width', newWidth);
+      // cropImageRef.current.setAttribute('height', newHeight);
+    // }
+
     // Since the event listeners are added and removed in this useEffect, eslint is giving a warning
     // And onPinchZoomCropImage, onResizeCropper, removeDragEventListeners are not changing throughout the component lifecycle so they are not added to the dependency array
     // But pointersArray might change yet it is not added to the dependency array because it is being emptied at the end of the event listener
@@ -375,7 +396,7 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
           </div>
         </div> */}
         <div className='crop-image-container' ref={cropImageContainerRef}>
-          {(isUserCropping && image.imageUrl) &&
+          {(isUserCropping && image.imageUrl && (!areChangesBeingApplied)) &&
             <>
               <img
                 ref={cropImageRef}
@@ -397,8 +418,10 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
                   hue-rotate(${image.hueRotate}deg)
                 `,
                 }}
-                width={(cropImageContainerRef.current.clientWidth / cropImageContainerRef.current.clientHeight) > (image.naturalWidth / image.naturalHeight) ? 'auto' : '100%'}
-                height={(cropImageContainerRef.current.clientWidth / cropImageContainerRef.current.clientHeight) > (image.naturalWidth / image.naturalHeight) ? '100%' : 'auto'}
+              // width={(window.innerWidth / window.innerHeight) > (image.naturalWidth / image.naturalHeight) ? 'auto' : '100%'}
+              // height={(window.innerWidth / window.innerHeight) > (image.naturalWidth / image.naturalHeight) ? '100%' : 'auto'}
+              width={(cropImageContainerRef.current.clientWidth / cropImageContainerRef.current.clientHeight) > (image.naturalWidth / image.naturalHeight) ? 'auto' : '100%'}
+              height={(cropImageContainerRef.current.clientWidth / cropImageContainerRef.current.clientHeight) > (image.naturalWidth / image.naturalHeight) ? '100%' : 'auto'}
               />
               <div
                 ref={cropperRef}

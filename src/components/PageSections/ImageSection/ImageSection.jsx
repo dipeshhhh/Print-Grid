@@ -2,25 +2,25 @@ import React, { useRef, useState } from 'react';
 import '../PageSections.css';
 import './ImageSection.css';
 
+// Utils
+import { validateImageFile } from '../../../utils/helpers.js';
+import { INITIAL_IMAGE_STATE } from '../../../utils/initialValues.js';
+
 // Components
 import CustomSizeDialog from '../../Dialogs/CustomSizeDialog/CustomSizeDialog.jsx';
 import ConfirmationDialog from '../../Dialogs/ConfirmationDialog/ConfirmationDialog.jsx';
 
 function ImageSection({
-  uploadImage,
   image,
+  setImage,
+  originalImageBackup,
   isBordered,
   setIsBordered,
   inputRef,
   imageSizes,
   setImageSizes,
   selectedImageSize,
-  setSelectedImageSize,
-
-  // Prop drilling
-  cmToPx,
-  inchToPx,
-  filesCheck
+  setSelectedImageSize
 }) {
   const [isUserDroppingImage, setIsUserDroppingImage] = useState(false);
   const newUploadFiles = useRef(null);
@@ -28,10 +28,31 @@ function ImageSection({
   const customImageSizeDialogRef = useRef(null);
   const imageSizeSelectorRef = useRef(null);
 
-  const handleCheckboxChange = () => { setIsBordered(!isBordered); }
-  const imageSizeHandle = (e) => {
-    if (e.target.value !== 'custom') setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
-    else customImageSizeDialogRef.current.showModal();
+  const loadImageFromFile = (file) => {
+    if (validateImageFile(file)) {
+      const imageUrl = URL.createObjectURL(file);
+      const img = new Image();
+      img.src = imageUrl;
+      img.onload = () => {
+        const imageToSet = {
+          ...INITIAL_IMAGE_STATE,
+          imageUrl: imageUrl,
+          naturalHeight: img.naturalHeight,
+          naturalWidth: img.naturalWidth
+        }
+        originalImageBackup.current = { ...imageToSet };
+        setImage({ ...imageToSet });
+      }
+    }
+  }
+  const loadImageFromFiles = (files) => {
+    if (files && (files.length > 0)) {
+      // Only load the first file
+      loadImageFromFile(files[0]);
+    }
+  }
+  const loadImageFromInputEvent = (e) => {
+    loadImageFromFiles(e.target.files);
   }
 
   const handleDragOver = (e) => {
@@ -40,16 +61,12 @@ function ImageSection({
   }
   const handleDrop = (e) => {
     e.preventDefault();
-    if (filesCheck(e.dataTransfer.files)) {
-      // since upload image expects e.target.files
-      const files = { target: { files: e.dataTransfer.files } };
-      if (!image.imageUrl) {
-        uploadImage(files);
-      }
-      else {
-        newUploadFiles.current = files;
-        confirmNewUploadRef.current.showModal();
-      }
+    if (!image.imageUrl) {
+      loadImageFromFiles(e.dataTransfer.files);
+    }
+    else {
+      newUploadFiles.current = e.dataTransfer.files;
+      confirmNewUploadRef.current.showModal();
     }
     setIsUserDroppingImage(false);
   }
@@ -57,6 +74,12 @@ function ImageSection({
     e.preventDefault();
     setIsUserDroppingImage(false)
   };
+
+  const handleCheckboxChange = () => { setIsBordered(!isBordered); }
+  const imageSizeHandle = (e) => {
+    if (e.target.value !== 'custom') setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
+    else customImageSizeDialogRef.current.showModal();
+  }
 
   // Hide the file input when an image is uploaded to show the preview.
   // Can't hide the input using 'display: none', 'visibility: hidden', or 'opacity: 0' because it will prevent the file input from working.
@@ -91,8 +114,6 @@ function ImageSection({
           setSizes={setImageSizes}
           selectedSize={selectedImageSize}
           setSelectedSize={setSelectedImageSize}
-          cmToPx={cmToPx}
-          inchToPx={inchToPx}
         />
         <span className='border-checkbox'>
           <input id='border-check' type='checkbox' checked={isBordered} onChange={handleCheckboxChange} />
@@ -145,13 +166,13 @@ function ImageSection({
           accept='image/*'
           ref={inputRef}
           style={image.imageUrl ? hiddenFileInputCss : {}}
-          onChange={uploadImage}
+          onChange={loadImageFromInputEvent}
         />
         <ConfirmationDialog
           referrer={confirmNewUploadRef}
           title='Open new image?'
           message='This will discard all changes made to the current image.'
-          onConfirm={() => uploadImage(newUploadFiles.current)}
+          onConfirm={() => loadImageFromFiles(newUploadFiles.current)}
           onClose={() => {
             setIsUserDroppingImage(false);
             confirmNewUploadRef.current.close();
@@ -171,9 +192,7 @@ function ImageSection({
 //   imageSizes: PropTypes.array.isRequired,
 //   setImageSizes: PropTypes.func.isRequired,
 //   selectedImageSize: PropTypes.object.isRequired,
-//   setSelectedImageSize: PropTypes.func.isRequired,
-//   cmToPx: PropTypes.func.isRequired,
-//   inchToPx: PropTypes.func.isRequired,
+//   setSelectedImageSize: PropTypes.func.isRequired
 // }
 
 export default ImageSection;
