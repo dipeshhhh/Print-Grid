@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 // Components
-import ThemeSwitchButton from './Components/ThemeSwitchButton/ThemeSwitchButton.jsx';
+import ThemeSwitchButton from './components/ThemeSwitchButton/ThemeSwitchButton.jsx';
 
 // Sections for the page
-import EditButtons from './Components/PageSections/EditButtons/EditButtons.jsx';
-import ImageSection from './Components/PageSections/ImageSection/ImageSection.jsx';
-import GenerateImage from './Components/PageSections/GenerateImage/GenerateImage.jsx';
+import EditButtons from './components/PageSections/EditButtons/EditButtons.jsx';
+import ImageSection from './components/PageSections/ImageSection/ImageSection.jsx';
+import GenerateImage from './components/PageSections/GenerateImage/GenerateImage.jsx';
 
 // Required variables/constants and helper functions
 //? Maybe move these to a separate file
