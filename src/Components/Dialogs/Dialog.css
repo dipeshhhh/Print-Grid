@@ -71,3 +71,9 @@
 .confirm-button {
   background-color: var(--primary);
 }
+
+@media (max-width: 280px) {
+  .dialog-buttons {
+    flex-direction: column;
+  }
+}

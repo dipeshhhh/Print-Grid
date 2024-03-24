@@ -31,6 +31,25 @@ const objectsAreEqual = (obj1, obj2) => {
   }
   return true;
 }
+const filesCheck = (files) => {
+  let result = true;
+  if (files && (files.length > 0)) {
+    for (let file of files) {
+      if (!(file.type.startsWith('image/'))) {
+        alert('Please select an image file.');
+        result = false;
+        break;
+      }
+      if (file.size > 50 * 1024 * 1024) { // file size should be less than 50MB
+        alert('File size should be less than 50MB');
+        result = false;
+        break;
+      }
+    };
+  }
+  else result = false;
+  return result;
+}
 
 function App() {
   // Input Referrer: for the file input element
@@ -217,7 +236,7 @@ function App() {
   }
 
   const uploadImage = (e) => {
-    if (e.target.files && (e.target.files.length > 0) && e.target.files[0].type.startsWith('image/')) {
+    if (filesCheck(e.target.files)) {
       const imageUrl = URL.createObjectURL(e.target.files[0]);
       const img = new Image();
       img.src = imageUrl;
@@ -241,9 +260,9 @@ function App() {
       }
       // URL.revokeObjectURL(imageUrl) // Free memory
     }
-    else {
-      alert('Please select an image file.')
-    }
+    // else {
+    //   alert('Please select an image file.')
+    // }
   }
 
   return (
@@ -283,6 +302,7 @@ function App() {
         setSelectedImageSize={setSelectedImageSize}
         cmToPx={cmToPx}
         inchToPx={inchToPx}
+        filesCheck={filesCheck}
       />
 
       <GenerateImage

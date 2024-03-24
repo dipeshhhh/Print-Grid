@@ -8,10 +8,13 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+  margin-bottom: var(--app-gap);
+  flex-grow: 1;
+  min-height: 50vh;
 }
 
-.result-image{
+.result-image {
   max-width: 100%;
-  max-height: calc( 100vh - 64px );
+  max-height: calc(100vh - 64px);
   /* max-height: 100%; */
 }

@@ -10,6 +10,7 @@
   background-color: var(--background-secondary);
   border-radius: var(--section-radius);
   max-height: calc(100vh - (var(--app-gap) * 2));
+  gap: var(--app-gap);
 }
 
 .topbar {
@@ -18,6 +19,7 @@
   justify-content: center;
   height: var(--topbar-height);
   gap: var(--app-gap);
+  flex-wrap: wrap;
 }
 
 .topbar-button {
@@ -44,4 +46,10 @@
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
   cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+  .topbar {
+    height: auto;
+  }
 }

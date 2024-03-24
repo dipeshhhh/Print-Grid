@@ -84,16 +84,38 @@
   padding: 0.5ch 1ch;
 }
 
-.empty-gap{
+.empty-gap {
   display: flex;
   flex-grow: 1;
 }
 
-.filter-reset-button{
+.filter-reset-button {
   display: flex;
   gap: 1ch;
   align-items: center;
   justify-self: end;
   align-self: flex-start;
   transform: scale(0.9) translateX(-4px);
+}
+
+@media screen and (max-width: 768px) {
+  .filters-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+}
+
+@media screen and (max-width: 375px) {
+  .responsive-adjustment-input {
+    display: grid;
+    grid-template-columns: 1fr 0.5fr;
+    gap: 1ch;
+  }
+  .filters-adjustment-item {
+    grid-template-columns: 1fr;
+    gap: 0ch;
+  }
+  .filter-adjustment-items {
+    gap: 1.5ch;
+  }
 }

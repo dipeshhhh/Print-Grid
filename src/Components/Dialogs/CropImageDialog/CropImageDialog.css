@@ -132,3 +132,10 @@
     --cropper-resizer-position: -10px;
   }
 }
+
+@media screen and (max-width: 768px) {
+  .crop-dialog-body {
+    /* height: calc(100vh - 250px); */
+    height: calc(100vh - 175px);
+  }
+}

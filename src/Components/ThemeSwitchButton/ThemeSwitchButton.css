@@ -1,6 +1,6 @@
 .theme-switch-button {
-  position: absolute;
-  top: 0;
+  position: fixed;
+  bottom: 0;
   right: 0;
   height: var(--toggle-theme-button-width) !important;
   width: var(--toggle-theme-button-width);

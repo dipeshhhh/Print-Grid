@@ -61,6 +61,9 @@ function GenerateImage({
         const inputImageCtx = inputImageCanvas.getContext('2d');
         inputImageCanvas.width = selectedImageSize.width;
         inputImageCanvas.height = selectedImageSize.height;
+        //? for future: maybe a custom background color for the input image
+        inputImageCtx.fillStyle = 'white';
+        inputImageCtx.fillRect(0, 0, inputImageCanvas.width, inputImageCanvas.height);
         inputImageCtx.filter = `
           brightness(${image.brightness}%)
           contrast(${image.contrast}%)

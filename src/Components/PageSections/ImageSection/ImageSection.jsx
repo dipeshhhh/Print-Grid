@@ -19,7 +19,8 @@ function ImageSection({
 
   // Prop drilling
   cmToPx,
-  inchToPx
+  inchToPx,
+  filesCheck
 }) {
   const [isUserDroppingImage, setIsUserDroppingImage] = useState(false);
   const newUploadFiles = useRef(null);
@@ -39,14 +40,16 @@ function ImageSection({
   }
   const handleDrop = (e) => {
     e.preventDefault();
-    // since upload image expects e.target.files
-    const files = { target: { files: e.dataTransfer.files } };
-    if (!image.imageUrl) {
-      uploadImage(files);
-    }
-    else {
-      newUploadFiles.current = files;
-      confirmNewUploadRef.current.showModal();
+    if (filesCheck(e.dataTransfer.files)) {
+      // since upload image expects e.target.files
+      const files = { target: { files: e.dataTransfer.files } };
+      if (!image.imageUrl) {
+        uploadImage(files);
+      }
+      else {
+        newUploadFiles.current = files;
+        confirmNewUploadRef.current.showModal();
+      }
     }
     setIsUserDroppingImage(false);
   }
@@ -131,9 +134,9 @@ function ImageSection({
           />
         }
         {
-          (!image.imageUrl) && 
-          <button className='upload-image-button' onClick={()=>{inputRef.current.click();}}>
-          Click to Upload Image
+          (!image.imageUrl) &&
+          <button className='upload-image-button' onClick={() => { inputRef.current.click(); }}>
+            Click to Upload Image
           </button>
         }
         <input

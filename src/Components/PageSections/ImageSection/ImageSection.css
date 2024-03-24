@@ -15,6 +15,9 @@
   height: 100%;
   overflow: overlay;
   overflow-x: hidden;
+  margin-bottom: var(--app-gap);
+  flex-grow: 1;
+  min-height: 50vh;
 }
 
 .border-checkbox {

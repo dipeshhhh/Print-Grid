@@ -4,6 +4,9 @@
   width: var(--edit-button-section-width);
   gap: var(--app-gap);
   background-color: var(--background);
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: var(--button-radius);
 }
 
 .sidebar {
@@ -11,4 +14,29 @@
   flex-direction: column;
   flex-grow: 1;
   gap: var(--app-gap);
+}
+
+@media screen and (max-width: 768px) {
+
+  .edit-buttons-section,
+  .sidebar {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .edit-buttons-section {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .edit-buttons-section::-webkit-scrollbar {
+    height: 5px;
+    display: none;
+  }
+}
+
+@media screen and (max-height: 574px) and (min-width: 768px) {
+  .edit-buttons-section {
+    width: calc(var(--edit-button-section-width) +  var(--scrollbar-width));
+  }
 }

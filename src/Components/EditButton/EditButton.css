@@ -4,6 +4,8 @@
 
 .edit-button {
   height: var(--edit-button-section-width);
+  width: var(--edit-button-section-width);
+  min-width: var(--edit-button-section-width);
   background-color: var(--secondary);
   color: var(--text);
   border-radius: var(--edit-button-radius);

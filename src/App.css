@@ -18,9 +18,9 @@
   position: relative;
 }
 
-.App>* {
+/* .App>* {
   height: 100%;
-}
+} */
 
 .primary-button {
   background-color: var(--primary);
@@ -35,4 +35,15 @@
   background-color: var(--primary-disabled);
   color: var(--text-disabled);
   cursor: not-allowed;
+}
+
+@media screen and (max-width: 768px) {
+  .App {
+    /* grid-template-columns: 1fr;
+    grid-template-rows: var(--edit-button-section-width) 100% 100%; */
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
 }

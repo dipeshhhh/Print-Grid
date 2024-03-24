@@ -18,8 +18,17 @@ function FilterRangeInput({ icon, label, min, max, value, onChange }) {
   return (
     <div className='filters-adjustment-item'>
       <span className='filter-adjustment-label'>{icon} {label}</span>
-      <input className='filter-adjustment-input' type='range' min={min} max={max} value={value} onChange={onChange} />
-      <input className='filter-adjustment-input filter-adjustment-number-input' type='number' min={min} max={max} value={value} onChange={onChange} />
+      {window.innerWidth < 375 ?
+        <span className='responsive-adjustment-input'>
+          <input className='filter-adjustment-input' type='range' min={min} max={max} value={value} onChange={onChange} />
+          <input className='filter-adjustment-input filter-adjustment-number-input' type='number' min={min} max={max} value={value} onChange={onChange} />
+        </span>
+        :
+        <>
+          <input className='filter-adjustment-input' type='range' min={min} max={max} value={value} onChange={onChange} />
+          <input className='filter-adjustment-input filter-adjustment-number-input' type='number' min={min} max={max} value={value} onChange={onChange} />
+        </>
+      }
     </div>
   )
 }
@@ -27,8 +36,17 @@ function FilterRangeInput({ icon, label, min, max, value, onChange }) {
 function FilterCheckboxInput({ icon, label, checked, onChange }) {
   return (
     <div className='filters-adjustment-item'>
-      <span className='filter-adjustment-label'>{icon} {label}</span>
-      <input className='filter-adjustment-input' type='checkbox' checked={checked} onChange={onChange} />
+      {window.innerWidth < 375 ?
+        <span className='responsive-adjustment-input'>
+          <span className='filter-adjustment-label'>{icon} {label}</span>
+          <input className='filter-adjustment-input' type='checkbox' checked={checked} onChange={onChange} />
+        </span>
+        :
+        <>
+          <span className='filter-adjustment-label'>{icon} {label}</span>
+          <input className='filter-adjustment-input' type='checkbox' checked={checked} onChange={onChange} />
+        </>
+      }
     </div>
   )
 }
