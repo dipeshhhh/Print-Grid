@@ -7,7 +7,7 @@ export const PRINT_DPI = 300;
 export const HISTORY_LIMIT = 10;
 
 // Input image
-export const INPUT_IMAGE_MAX_FILE_SIZE_MB = 10; // 10MB
+export const INPUT_IMAGE_MAX_FILE_SIZE_MB = 50; // MB
 export const INPUT_IMAGE_MAX_FILE_SIZE_BYTES = INPUT_IMAGE_MAX_FILE_SIZE_MB * 1024 * 1024; // 10MB in bytes
 export const INPUT_IMAGE_BACKGROUND_COLOR = 'white';
 export const INPUT_IMAGE_BORDER_COLOR = 'black';
