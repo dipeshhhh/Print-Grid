@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import '../Dialog.css';
 import './CustomSizeDialog.css';
 
@@ -27,12 +27,20 @@ function CustomSizeDialog({
   sizes,
   setSizes,
   selectedSize,
-  setSelectedSize
+  setSelectedSize,
+  localStorageKey
 }) {
   const widthInputRef = useRef(null);
   const widthUnitRef = useRef(null);
   const heightInputRef = useRef(null);
   const heightUnitRef = useRef(null);
+
+  useEffect(() => {
+    referrer.current.onclose = function () {
+      selectorRef.current.value = selectedSize.name;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [referrer, selectedSize])
 
   const addCustomImageSize = () => {
     const width = widthInputRef.current.value;
@@ -59,10 +67,12 @@ function CustomSizeDialog({
         width: widthInPx,
         height: heightInPx
       }
+      const newSizes = [customSize, ...sizes];
       setSelectedSize(customSize);
-      setSizes([customSize, ...sizes]);
+      setSizes(newSizes);
       // setSizes([...sizes, customSize]); //? Why is this not working?
       selectorRef.current.value = customSize.name;
+      localStorage.setItem(localStorageKey, JSON.stringify(newSizes));
       referrer.current.close();
     }
   }

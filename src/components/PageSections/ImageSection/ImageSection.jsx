@@ -1,10 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import '../PageSections.css';
 import './ImageSection.css';
 
 // Utils
+import { INPUT_IMAGE_SIZES_LOCAL_STORAGE_KEY } from '../../../utils/configs.js';
 import { validateImageFile } from '../../../utils/helpers.js';
-import { INITIAL_IMAGE_STATE } from '../../../utils/initialValues.js';
+import { INITIAL_IMAGE_SIZES, INITIAL_IMAGE_STATE } from '../../../utils/initialValues.js';
 
 // Components
 import CustomSizeDialog from '../../Dialogs/CustomSizeDialog/CustomSizeDialog.jsx';
@@ -27,6 +28,17 @@ function ImageSection({
   const confirmNewUploadRef = useRef(null);
   const customImageSizeDialogRef = useRef(null);
   const imageSizeSelectorRef = useRef(null);
+  const confirmClearCustomSizesRef = useRef(null);
+
+  useEffect(() => {
+    confirmClearCustomSizesRef.current.onclose = function () {
+      imageSizeSelectorRef.current.value = selectedImageSize.name
+    }
+  }, [confirmClearCustomSizesRef, selectedImageSize])
+
+  useEffect(() => {
+    imageSizeSelectorRef.current.value = selectedImageSize.name;
+  }, [selectedImageSize]);
 
   const loadImageFromFile = (file) => {
     if (validateImageFile(file)) {
@@ -75,10 +87,18 @@ function ImageSection({
     setIsUserDroppingImage(false)
   };
 
+  const clearCustomSizes = () => {
+    const initialSizes = [...INITIAL_IMAGE_SIZES]
+    setImageSizes(initialSizes);
+    setSelectedImageSize(initialSizes[0]);
+    localStorage.removeItem(INPUT_IMAGE_SIZES_LOCAL_STORAGE_KEY);
+  }
+
   const handleCheckboxChange = () => { setIsBordered(!isBordered); }
   const imageSizeHandle = (e) => {
-    if (e.target.value !== 'custom') setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
-    else customImageSizeDialogRef.current.showModal();
+    if ((e.target.value !== 'custom') && (e.target.value !== 'clearCustoms')) setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
+    else if (e.target.value === 'custom') customImageSizeDialogRef.current.showModal();
+    else if (e.target.value === 'clearCustoms') confirmClearCustomSizesRef.current.showModal();
   }
 
   return (
@@ -93,6 +113,7 @@ function ImageSection({
             ))
           }
           <option value='custom'>Custom Size</option>
+          {localStorage.getItem(INPUT_IMAGE_SIZES_LOCAL_STORAGE_KEY) && <option value='clearCustoms'>Remove/Clear Custom Sizes</option>}
         </select>
         <CustomSizeDialog
           referrer={customImageSizeDialogRef}
@@ -102,6 +123,13 @@ function ImageSection({
           setSizes={setImageSizes}
           selectedSize={selectedImageSize}
           setSelectedSize={setSelectedImageSize}
+          localStorageKey={`${INPUT_IMAGE_SIZES_LOCAL_STORAGE_KEY}`}
+        />
+        <ConfirmationDialog
+          referrer={confirmClearCustomSizesRef}
+          title='Clear custom image sizes?'
+          message='This will remove all the saved custom image sizes on this site.'
+          onConfirm={clearCustomSizes}
         />
         <span className='border-checkbox'>
           <input id='border-check' type='checkbox' checked={isBordered} onChange={handleCheckboxChange} />

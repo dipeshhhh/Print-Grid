@@ -4,7 +4,13 @@ import './App.css';
 // Utils
 import { areObjectsDeepEqual } from './utils/helpers.js';
 import { INITIAL_IMAGE_SIZES, INITIAL_SHEET_SIZES, INITIAL_IMAGE_STATE } from './utils/initialValues.js';
-import { HISTORY_LIMIT } from './utils/configs.js';
+import {
+  HISTORY_LIMIT,
+  INPUT_IMAGE_SIZES_LOCAL_STORAGE_KEY,
+  RESULT_IMAGE_SHEET_SIZES_LOCAL_STORAGE_KEY,
+  LAST_SELECTED_IMAGE_SIZE_LOCAL_STORAGE_KEY,
+  LAST_SELECTED_SHEET_SIZE_LOCAL_STORAGE_KEY
+} from './utils/configs.js';
 
 // Components
 import ThemeSwitchButton from './components/ThemeSwitchButton/ThemeSwitchButton.jsx';
@@ -39,14 +45,44 @@ function App() {
   const [isRedoDisabled, setIsRedoDisabled] = useState(true);
 
   // Image and Sheet sizes in px
-  const [imageSizes, setImageSizes] = useState([...INITIAL_IMAGE_SIZES]);
-  const [sheetSizes, setSheetSizes] = useState([...INITIAL_SHEET_SIZES]);
-  const [selectedImageSize, setSelectedImageSize] = useState(imageSizes[0]);
-  const [selectedSheetSize, setSelectedSheetSize] = useState(sheetSizes[0]);
+  // Checking existance in local storage
+  const [imageSizes, setImageSizes] = useState(
+    (localStorage.getItem(INPUT_IMAGE_SIZES_LOCAL_STORAGE_KEY))
+      ?
+      [...JSON.parse(localStorage.getItem(INPUT_IMAGE_SIZES_LOCAL_STORAGE_KEY))]
+      :
+      [...INITIAL_IMAGE_SIZES]
+  );
+  const [sheetSizes, setSheetSizes] = useState(
+    (localStorage.getItem(RESULT_IMAGE_SHEET_SIZES_LOCAL_STORAGE_KEY))
+      ?
+      [...JSON.parse(localStorage.getItem(RESULT_IMAGE_SHEET_SIZES_LOCAL_STORAGE_KEY))]
+      :
+      [...INITIAL_SHEET_SIZES]
+  );
+  const [selectedImageSize, setSelectedImageSize] = useState(
+    (localStorage.getItem(LAST_SELECTED_IMAGE_SIZE_LOCAL_STORAGE_KEY))
+      ?
+      JSON.parse(localStorage.getItem(LAST_SELECTED_IMAGE_SIZE_LOCAL_STORAGE_KEY))
+      :
+      imageSizes[0]
+  );
+  const [selectedSheetSize, setSelectedSheetSize] = useState(
+    (localStorage.getItem(LAST_SELECTED_SHEET_SIZE_LOCAL_STORAGE_KEY))
+    ?
+    JSON.parse(localStorage.getItem(LAST_SELECTED_SHEET_SIZE_LOCAL_STORAGE_KEY))
+    :
+    sheetSizes[0]
+    );
 
   // Image
   const [isBordered, setIsBordered] = useState(false);
   const [image, setImage] = useState({ ...INITIAL_IMAGE_STATE });
+
+  useEffect(() => {
+    localStorage.setItem(LAST_SELECTED_IMAGE_SIZE_LOCAL_STORAGE_KEY, JSON.stringify(selectedImageSize));
+    localStorage.setItem(LAST_SELECTED_SHEET_SIZE_LOCAL_STORAGE_KEY, JSON.stringify(selectedSheetSize));
+  }, [selectedImageSize, selectedSheetSize]);
 
   useEffect(() => {
     if (!image.url) {
@@ -172,8 +208,8 @@ function App() {
         isUndoDisabled={isUndoDisabled}
         isRedoDisabled={isRedoDisabled}
         applyChangesToImage={applyChangesToImage}
-        originalImageBackup={originalImageBackup}        
-        selectedImageSize={selectedImageSize}        
+        originalImageBackup={originalImageBackup}
+        selectedImageSize={selectedImageSize}
         isUserAddingFilters={isUserAddingFilters}
         setIsUserAddingFilters={setIsUserAddingFilters}
         isUserCropping={isUserCropping}

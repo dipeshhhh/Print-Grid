@@ -1,12 +1,14 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import '../PageSections.css';
 import './GenerateImage.css';
 
 // Utils
-import { DOWNLOAD_RESULT_IMAGE_NAME, INPUT_IMAGE_BACKGROUND_COLOR, INPUT_IMAGE_BORDER_COLOR, INPUT_IMAGE_BORDER_WIDTH, RESULT_IMAGE_BACKGROUND_COLOR } from '../../../utils/configs.js';
+import { DOWNLOAD_RESULT_IMAGE_NAME, INPUT_IMAGE_BACKGROUND_COLOR, INPUT_IMAGE_BORDER_COLOR, INPUT_IMAGE_BORDER_WIDTH, RESULT_IMAGE_BACKGROUND_COLOR, RESULT_IMAGE_SHEET_SIZES_LOCAL_STORAGE_KEY } from '../../../utils/configs.js';
+import { INITIAL_SHEET_SIZES } from '../../../utils/initialValues.js';
 
 // Components
 import CustomSizeDialog from '../../Dialogs/CustomSizeDialog/CustomSizeDialog.jsx';
+import ConfirmationDialog from '../../Dialogs/ConfirmationDialog/ConfirmationDialog.jsx';
 
 function GenerateImage({
   image,
@@ -25,6 +27,17 @@ function GenerateImage({
   const [isResultLoading, setIsResultLoading] = useState(false);
   const customSheetSizeDialogRef = useRef(null);
   const sheetSizeSelectorRef = useRef(null);
+  const confirmClearCustomSizesRef = useRef(null);
+
+  useEffect(() => {
+    confirmClearCustomSizesRef.current.onclose = function () {
+      sheetSizeSelectorRef.current.value = selectedSheetSize.name;
+    }
+  }, [confirmClearCustomSizesRef, selectedSheetSize]);
+
+  useEffect(() => { // update selector value, incase something else changes selectedSheetSize
+    sheetSizeSelectorRef.current.value = selectedSheetSize.name;
+  }, [selectedSheetSize]);
 
   const generateResultImage = async () => {
     if (!image.url) return; // Prevent generating result if no image is uploaded
@@ -147,8 +160,16 @@ function GenerateImage({
   }
 
   const handleSizeChange = (e) => {
-    if (e.target.value !== 'custom') setSelectedSheetSize(sheetSizes.find(sheetSize => sheetSize.name === e.target.value));
-    else customSheetSizeDialogRef.current.showModal();
+    if ((e.target.value !== 'custom') && (e.target.value !== 'clearCustoms')) setSelectedSheetSize(sheetSizes.find(sheetSize => sheetSize.name === e.target.value));
+    else if (e.target.value === 'custom') customSheetSizeDialogRef.current.showModal();
+    else if (e.target.value === 'clearCustoms') confirmClearCustomSizesRef.current.showModal();
+  }
+
+  const clearCustomSizes = () => {
+    const initialSizes = [...INITIAL_SHEET_SIZES];
+    setSheetSizes(initialSizes);
+    setSelectedSheetSize(initialSizes[0]);
+    localStorage.removeItem(RESULT_IMAGE_SHEET_SIZES_LOCAL_STORAGE_KEY);
   }
 
   return (
@@ -161,6 +182,7 @@ function GenerateImage({
             ))
           }
           <option value='custom'>Custom Size</option>
+          {localStorage.getItem(RESULT_IMAGE_SHEET_SIZES_LOCAL_STORAGE_KEY) && <option value='clearCustoms'>Remove/Clear Custom Sizes</option>}
         </select>
         <CustomSizeDialog
           referrer={customSheetSizeDialogRef}
@@ -170,6 +192,13 @@ function GenerateImage({
           setSizes={setSheetSizes}
           selectedSize={selectedSheetSize}
           setSelectedSize={setSelectedSheetSize}
+          localStorageKey={RESULT_IMAGE_SHEET_SIZES_LOCAL_STORAGE_KEY}
+        />
+        <ConfirmationDialog
+          referrer={confirmClearCustomSizesRef}
+          title='Clear custom image sizes?'
+          message='This will remove all the saved custom image sizes on this site.'
+          onConfirm={clearCustomSizes}
         />
         <button className='primary-button' onClick={generateResultImage} disabled={isGenerateDisabled}>Generate</button>
         <button className='primary-button' onClick={downloadImage} disabled={isDownloadDisabled}>Download</button>
