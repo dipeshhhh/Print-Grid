@@ -7,6 +7,7 @@ export const PRINT_DPI = 300;
 export const HISTORY_LIMIT = 10;
 
 // Input image
+export const LAST_IS_BORDERED_VALUE_LOCAL_STORAGE_KEY = 'lastIsBorderedValue';
 export const LAST_SELECTED_IMAGE_SIZE_LOCAL_STORAGE_KEY = 'lastSelectedImageSize';
 export const INPUT_IMAGE_SIZES_LOCAL_STORAGE_KEY = 'inputImageSizes';
 export const INPUT_IMAGE_MAX_FILE_SIZE_MB = 50; // MB

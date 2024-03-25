@@ -9,7 +9,8 @@ import {
   INPUT_IMAGE_SIZES_LOCAL_STORAGE_KEY,
   RESULT_IMAGE_SHEET_SIZES_LOCAL_STORAGE_KEY,
   LAST_SELECTED_IMAGE_SIZE_LOCAL_STORAGE_KEY,
-  LAST_SELECTED_SHEET_SIZE_LOCAL_STORAGE_KEY
+  LAST_SELECTED_SHEET_SIZE_LOCAL_STORAGE_KEY,
+  LAST_IS_BORDERED_VALUE_LOCAL_STORAGE_KEY
 } from './utils/configs.js';
 
 // Components
@@ -76,8 +77,18 @@ function App() {
     );
 
   // Image
-  const [isBordered, setIsBordered] = useState(false);
+  const [isBordered, setIsBordered] = useState(
+    (localStorage.getItem(LAST_IS_BORDERED_VALUE_LOCAL_STORAGE_KEY))
+    ?
+    JSON.parse(localStorage.getItem(LAST_IS_BORDERED_VALUE_LOCAL_STORAGE_KEY))
+    :
+    false
+  );
   const [image, setImage] = useState({ ...INITIAL_IMAGE_STATE });
+
+  useEffect(()=>{
+    localStorage.setItem(LAST_IS_BORDERED_VALUE_LOCAL_STORAGE_KEY, JSON.stringify(isBordered));
+  }, [isBordered]);
 
   useEffect(() => {
     localStorage.setItem(LAST_SELECTED_IMAGE_SIZE_LOCAL_STORAGE_KEY, JSON.stringify(selectedImageSize));
