@@ -147,6 +147,8 @@ function App() {
         setImage({
           ...image,
           imageUrl: canvasDataUrl,
+          naturalHeight: image.rotate !== 0 ? img.naturalWidth : img.naturalHeight,
+          naturalWidth: image.rotate !== 0 ? img.naturalHeight : img.naturalWidth,
           rotate: image.rotate !== 0 ? 0 : image.rotate,
           verticalScale: image.verticalScale !== 1 ? 1 : image.verticalScale,
           horizontalScale: image.horizontalScale !== 1 ? 1 : image.horizontalScale,
