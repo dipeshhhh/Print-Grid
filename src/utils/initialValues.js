@@ -42,7 +42,7 @@ export const INITIAL_SHEET_SIZES = [
 
 // Image state
 export const INITIAL_IMAGE_STATE = {
-  imageUrl: false,
+  url: false,
   brightness: 100,
   contrast: 100,
   saturate: 100,

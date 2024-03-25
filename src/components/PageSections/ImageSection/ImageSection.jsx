@@ -30,13 +30,13 @@ function ImageSection({
 
   const loadImageFromFile = (file) => {
     if (validateImageFile(file)) {
-      const imageUrl = URL.createObjectURL(file);
+      const url = URL.createObjectURL(file);
       const img = new Image();
-      img.src = imageUrl;
+      img.src = url;
       img.onload = () => {
         const imageToSet = {
           ...INITIAL_IMAGE_STATE,
-          imageUrl: imageUrl,
+          url: url,
           naturalHeight: img.naturalHeight,
           naturalWidth: img.naturalWidth
         }
@@ -61,7 +61,7 @@ function ImageSection({
   }
   const handleDrop = (e) => {
     e.preventDefault();
-    if (!image.imageUrl) {
+    if (!image.url) {
       loadImageFromFiles(e.dataTransfer.files);
     }
     else {
@@ -79,18 +79,6 @@ function ImageSection({
   const imageSizeHandle = (e) => {
     if (e.target.value !== 'custom') setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
     else customImageSizeDialogRef.current.showModal();
-  }
-
-  // Hide the file input when an image is uploaded to show the preview.
-  // Can't hide the input using 'display: none', 'visibility: hidden', or 'opacity: 0' because it will prevent the file input from working.
-  // Need the fileInput for uploading new images after the first one, thus can't remove it after the first upload.
-  const hiddenFileInputCss = {
-    position: 'absolute',
-    opacity: '0',
-    height: '0.1px',
-    width: '0.1px',
-    overflow: 'hidden',
-    zIndex: '-1',
   }
 
   return (
@@ -133,10 +121,10 @@ function ImageSection({
             <h4>Drop the image here</h4>
           </div>
         }
-        {image.imageUrl &&
+        {image.url &&
           <img
             className='image-preview'
-            src={image.imageUrl}
+            src={image.url}
             alt='Upload preview'
             style={{
               transform: `
@@ -155,7 +143,7 @@ function ImageSection({
           />
         }
         {
-          (!image.imageUrl) &&
+          (!image.url) &&
           <button className='upload-image-button' onClick={() => { inputRef.current.click(); }}>
             Click to Upload Image
           </button>
@@ -165,7 +153,6 @@ function ImageSection({
           className='file-input-hidden'
           accept='image/*'
           ref={inputRef}
-          style={image.imageUrl ? hiddenFileInputCss : {}}
           onChange={loadImageFromInputEvent}
         />
         <ConfirmationDialog
@@ -183,9 +170,10 @@ function ImageSection({
   )
 }
 
-// ImageSection.prototype = {
-//   uploadImage: PropTypes.func.isRequired,
+// ImageSection.proptype = {
 //   image: PropTypes.object.isRequired,
+//   setImage: PropTypes.func.isRequired,
+//   originalImageBackup: PropTypes.object.isRequired,
 //   isBordered: PropTypes.bool.isRequired,
 //   setIsBordered: PropTypes.func.isRequired,
 //   inputRef: PropTypes.object.isRequired,

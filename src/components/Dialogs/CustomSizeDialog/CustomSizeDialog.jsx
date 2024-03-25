@@ -4,27 +4,13 @@ import './CustomSizeDialog.css';
 
 // Utils
 import { cmToPx, inchToPx } from '../../../utils/converters.js';
-
-// Helper function to validate input as a number
-const validateNumber = (e) => {
-  const input = e.target;
-  // Replace any non-digit characters except for the dot
-  input.value = input.value.replace(/[^\d.]/g, '');
-  // Ensure there is only one dot
-  input.value = input.value.replace(/(\..*)\./g, '$1');
-  // Ensure that if the value starts with a dot, it is replaced with '0.'
-  input.value = input.value.replace(/^\./, '0.');
-  // Ensure that if the value starts with multiple zeros, they are replaced with a single zero
-  input.value = input.value.replace(/^0+(?=\d)/, '0');
-  // Ensure that if the value contains leading zeros, they are removed
-  input.value = input.value.replace(/^0+(\d)/, '$1');
-}
+import { sanitizeNumericInputFromEvent } from '../../../utils/helpers.js';
 
 function SizeInput({ label, inputRef, unitRef }) {
   return (
     <div className='custom-image-size-input'>
       <label className='custom-image-size-input-label'>{label}</label>
-      <input type='text' className='custom-image-size-input-input' onChange={validateNumber} ref={inputRef} />
+      <input type='text' className='custom-image-size-input-input' onChange={sanitizeNumericInputFromEvent} ref={inputRef} />
       <select className='custom-image-size-input-unit' ref={unitRef}>
         <option value='cm'>cm</option>
         <option value='inch'>inch</option>
@@ -34,7 +20,15 @@ function SizeInput({ label, inputRef, unitRef }) {
   )
 }
 
-function CustomSizeDialog({ referrer, selectorRef, title, sizes, setSizes, selectedSize, setSelectedSize }) {
+function CustomSizeDialog({
+  referrer,
+  selectorRef,
+  title,
+  sizes,
+  setSizes,
+  selectedSize,
+  setSelectedSize
+}) {
   const widthInputRef = useRef(null);
   const widthUnitRef = useRef(null);
   const heightInputRef = useRef(null);
@@ -76,7 +70,7 @@ function CustomSizeDialog({ referrer, selectorRef, title, sizes, setSizes, selec
   const closeDialog = () => {
     referrer.current.close();
     // Set the selector back to the previously selected image size
-    // I think this condition check is not necessary since currrent.value will be 'custom' if we are in this dialog, but I'll keep it for now
+    //? I think this condition check is not necessary since currrent.value will be 'custom' if we are in this dialog, but I'll keep it for now
     if (`${selectorRef.current.value}`.toLowerCase() === 'custom') selectorRef.current.value = selectedSize.name;
   }
 
@@ -106,9 +100,7 @@ function CustomSizeDialog({ referrer, selectorRef, title, sizes, setSizes, selec
 //   sizes: React.PropTypes.array,
 //   setSizes: React.PropTypes.func,
 //   selectedSize: React.PropTypes.object,
-//   setSelectedSize: React.PropTypes.func,
-//   cmToPx: React.PropTypes.func,
-//   inchToPx: React.PropTypes.func
+//   setSelectedSize: React.PropTypes.func
 // }
 
 export default CustomSizeDialog;

@@ -11,9 +11,6 @@ import WhatshotIcon from '@mui/icons-material/Whatshot';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
 import RestoreIcon from '@mui/icons-material/Restore'
 
-//! Known Bugs:
-// On clicking the reset button, everything works fine but the contrast range input does not reset to 100 yet the contrast resets to 100.
-
 function FilterRangeInput({ icon, label, min, max, value, onChange }) {
   return (
     <div className='filters-adjustment-item'>
@@ -51,7 +48,14 @@ function FilterCheckboxInput({ icon, label, checked, onChange }) {
   )
 }
 
-function FiltersDialog({ referrer, isUserAddingFilters, setIsUserAddingFilters, image, setImage, areChangesBeingApplied }) {
+function FiltersDialog({
+  referrer,
+  isUserAddingFilters,
+  setIsUserAddingFilters,
+  image,
+  setImage,
+  areChangesBeingApplied
+}) {
   const previewImageRef = useRef(null);
   const [previewImage, setPreviewImage] = useState(null);
   const onClose = () => { setIsUserAddingFilters(false) };
@@ -107,7 +111,7 @@ function FiltersDialog({ referrer, isUserAddingFilters, setIsUserAddingFilters, 
           <section className='filters-preview-section'>
             <img
               ref={previewImageRef}
-              src={previewImage.imageUrl}
+              src={previewImage.url}
               alt='Preview'
               className='filters-preview-image'
               style={{

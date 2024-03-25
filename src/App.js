@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 // Utils
-import { cmToPx, inchToPx } from './utils/converters.js';
-import { validateImageFiles, areObjectsDeepEqual } from './utils/helpers.js';
+import { areObjectsDeepEqual } from './utils/helpers.js';
 import { INITIAL_IMAGE_SIZES, INITIAL_SHEET_SIZES, INITIAL_IMAGE_STATE } from './utils/initialValues.js';
 import { HISTORY_LIMIT } from './utils/configs.js';
 
@@ -50,7 +49,7 @@ function App() {
   const [image, setImage] = useState({ ...INITIAL_IMAGE_STATE });
 
   useEffect(() => {
-    if (!image.imageUrl) {
+    if (!image.url) {
       setIsEditDisabled(true);
       setIsGenerateDisabled(true);
       return;
@@ -87,7 +86,7 @@ function App() {
   }, [image]);
 
   async function applyChangesToImage() {
-    if (!image.imageUrl) return;
+    if (!image.url) return;
     // If result image is not being generated and no change has happened, prevent doing all this again
     if ((!generatingResultFlag.current) && (image.rotate === 0) && (image.verticalScale === 1) && (image.horizontalScale === 1)) return;
     setAreChangesBeingApplied(true);
@@ -97,7 +96,7 @@ function App() {
     const ctx = canvas.getContext('2d');
 
     const img = new Image();
-    img.src = image.imageUrl;
+    img.src = image.url;
 
     // must use await here to wait for the image to load
     await new Promise((resolve, reject) => {
@@ -146,7 +145,7 @@ function App() {
         canvasDataUrl = canvas.toDataURL('image/png');
         setImage({
           ...image,
-          imageUrl: canvasDataUrl,
+          url: canvasDataUrl,
           naturalHeight: image.rotate !== 0 ? img.naturalWidth : img.naturalHeight,
           naturalWidth: image.rotate !== 0 ? img.naturalHeight : img.naturalWidth,
           rotate: image.rotate !== 0 ? 0 : image.rotate,
@@ -165,28 +164,27 @@ function App() {
       <EditButtons
         image={image}
         setImage={setImage}
-        isEditDisabled={isEditDisabled}
         inputRef={inputRef}
-        imageSizes={imageSizes}
-        selectedImageSize={selectedImageSize}
-        setSelectedImageSize={setSelectedImageSize}
+        editHistory={editHistory}
+        editHistoryIndex={editHistoryIndex}
+        redoFlag={redoFlag}
+        isEditDisabled={isEditDisabled}
+        isUndoDisabled={isUndoDisabled}
+        isRedoDisabled={isRedoDisabled}
+        applyChangesToImage={applyChangesToImage}
+        originalImageBackup={originalImageBackup}        
+        selectedImageSize={selectedImageSize}        
         isUserAddingFilters={isUserAddingFilters}
         setIsUserAddingFilters={setIsUserAddingFilters}
         isUserCropping={isUserCropping}
         setIsUserCropping={setIsUserCropping}
-        editHistory={editHistory}
-        editHistoryIndex={editHistoryIndex}
-        redoFlag={redoFlag}
-        isUndoDisabled={isUndoDisabled}
-        isRedoDisabled={isRedoDisabled}
-        applyChangesToImage={applyChangesToImage}
         areChangesBeingApplied={areChangesBeingApplied}
-        originalImageBackup={originalImageBackup}
       />
 
       <ImageSection
         image={image}
         setImage={setImage}
+        originalImageBackup={originalImageBackup}
         isBordered={isBordered}
         setIsBordered={setIsBordered}
         inputRef={inputRef}
@@ -194,23 +192,20 @@ function App() {
         setImageSizes={setImageSizes}
         selectedImageSize={selectedImageSize}
         setSelectedImageSize={setSelectedImageSize}
-        originalImageBackup={originalImageBackup}
       />
 
       <GenerateImage
-        isGenerateDisabled={isGenerateDisabled}
+        image={image}
         isBordered={isBordered}
-        setIsBordered={setIsBordered}
+        isGenerateDisabled={isGenerateDisabled}
+        generatingResultFlag={generatingResultFlag}
+        selectedImageSize={selectedImageSize}
         sheetSizes={sheetSizes}
         setSheetSizes={setSheetSizes}
         selectedSheetSize={selectedSheetSize}
         setSelectedSheetSize={setSelectedSheetSize}
-        image={image}
-        selectedImageSize={selectedImageSize}
-        cmToPx={cmToPx}
-        inchToPx={inchToPx}
         applyChangesToImage={applyChangesToImage}
-        generatingResultFlag={generatingResultFlag}
+        areChangesBeingApplied={areChangesBeingApplied}
       />
 
       <ThemeSwitchButton />

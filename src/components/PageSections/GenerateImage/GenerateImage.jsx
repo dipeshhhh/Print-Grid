@@ -2,6 +2,9 @@ import React, { useRef, useState } from 'react';
 import '../PageSections.css';
 import './GenerateImage.css';
 
+// Utils
+import { DOWNLOAD_RESULT_IMAGE_NAME, INPUT_IMAGE_BACKGROUND_COLOR, INPUT_IMAGE_BORDER_COLOR, INPUT_IMAGE_BORDER_WIDTH, RESULT_IMAGE_BACKGROUND_COLOR } from '../../../utils/configs.js';
+
 // Components
 import CustomSizeDialog from '../../Dialogs/CustomSizeDialog/CustomSizeDialog.jsx';
 
@@ -15,11 +18,7 @@ function GenerateImage({
   setSheetSizes,
   selectedSheetSize,
   setSelectedSheetSize,
-  applyChangesToImage,
-
-  // Prop drilling
-  cmToPx,
-  inchToPx
+  applyChangesToImage
 }) {
   const [resultImage, setResultImage] = useState(null);
   const [isDownloadDisabled, setIsDownloadDisabled] = useState(true);
@@ -28,7 +27,7 @@ function GenerateImage({
   const sheetSizeSelectorRef = useRef(null);
 
   const generateResultImage = async () => {
-    if (!image.imageUrl) return; // Prevent generating result if no image is uploaded
+    if (!image.url) return; // Prevent generating result if no image is uploaded
     if (generatingResultFlag.current) return; // Prevent multiple result generation at the same time
 
     // Set the flag to prevent multiple result generation at the same time
@@ -48,11 +47,11 @@ function GenerateImage({
     const resultImageCtx = resultImageCanvas.getContext('2d');
     resultImageCanvas.width = selectedSheetSize.width;
     resultImageCanvas.height = selectedSheetSize.height;
-    resultImageCtx.fillStyle = 'white';
+    resultImageCtx.fillStyle = RESULT_IMAGE_BACKGROUND_COLOR;
     resultImageCtx.fillRect(0, 0, resultImageCanvas.width, resultImageCanvas.height);
 
     try {
-      const imageUrl = await applyChangesToImage();
+      const url = await applyChangesToImage();
 
       const inputImage = new Image();
       inputImage.onload = () => {
@@ -61,8 +60,7 @@ function GenerateImage({
         const inputImageCtx = inputImageCanvas.getContext('2d');
         inputImageCanvas.width = selectedImageSize.width;
         inputImageCanvas.height = selectedImageSize.height;
-        //? for future: maybe a custom background color for the input image
-        inputImageCtx.fillStyle = 'white';
+        inputImageCtx.fillStyle = INPUT_IMAGE_BACKGROUND_COLOR;
         inputImageCtx.fillRect(0, 0, inputImageCanvas.width, inputImageCanvas.height);
         inputImageCtx.filter = `
           brightness(${image.brightness}%)
@@ -89,7 +87,7 @@ function GenerateImage({
 
         if (isBordered) { // Add border to the image
           // Border configurations
-          let borderWidth = 5; // Border width (px)
+          let borderWidth = INPUT_IMAGE_BORDER_WIDTH;
           // Adjust border width according to the size of the image
           if ((selectedImageSize.width < 10) || (selectedImageSize.height < 10)) borderWidth = 0;
           else if ((selectedImageSize.width < 30) || (selectedImageSize.height < 30)) borderWidth = 1;
@@ -99,7 +97,7 @@ function GenerateImage({
           const borderedInputImageCtx = borderedInputImageCanvas.getContext('2d');
           borderedInputImageCanvas.width = selectedImageSize.width;
           borderedInputImageCanvas.height = selectedImageSize.height;
-          borderedInputImageCtx.fillStyle = 'black';
+          borderedInputImageCtx.fillStyle = INPUT_IMAGE_BORDER_COLOR;
           borderedInputImageCtx.fillRect(0, 0, borderedInputImageCanvas.width, borderedInputImageCanvas.height);
 
           borderedInputImageCtx.drawImage(
@@ -133,7 +131,7 @@ function GenerateImage({
         setIsDownloadDisabled(false);
         setIsResultLoading(false);
       }
-      inputImage.src = imageUrl;
+      inputImage.src = url;
     } catch (error) {
       generateResultImage.current = false;
       setIsResultLoading(false);
@@ -144,7 +142,7 @@ function GenerateImage({
     if (!resultImage) return;
     const link = document.createElement('a');
     link.href = resultImage;
-    link.download = 'result.png';
+    link.download = DOWNLOAD_RESULT_IMAGE_NAME;
     link.click();
   }
 
@@ -172,8 +170,6 @@ function GenerateImage({
           setSizes={setSheetSizes}
           selectedSize={selectedSheetSize}
           setSelectedSize={setSelectedSheetSize}
-          cmToPx={cmToPx}
-          inchToPx={inchToPx}
         />
         <button className='primary-button' onClick={generateResultImage} disabled={isGenerateDisabled}>Generate</button>
         <button className='primary-button' onClick={downloadImage} disabled={isDownloadDisabled}>Download</button>
@@ -204,9 +200,7 @@ function GenerateImage({
 //   setSheetSizes: PropTypes.func.isRequired,
 //   selectedSheetSize: PropTypes.object.isRequired,
 //   setSelectedSheetSize: PropTypes.func.isRequired,
-//   applyChangesToImage: PropTypes.func.isRequired,
-//   cmToPx: PropTypes.func.isRequired,
-//   inchToPx: PropTypes.func.isRequired
+//   applyChangesToImage: PropTypes.func.isRequired
 // }
 
 export default GenerateImage;

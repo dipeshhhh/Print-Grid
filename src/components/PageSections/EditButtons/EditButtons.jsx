@@ -33,9 +33,7 @@ function EditButtons({
   originalImageBackup,
 
   // Prop drilling
-  imageSizes,
   selectedImageSize,
-  setSelectedImageSize,
   isUserAddingFilters,
   setIsUserAddingFilters,
   isUserCropping,
@@ -46,7 +44,7 @@ function EditButtons({
   const confirmNewImageDialogRef = useRef(null);
   const filterDialogRef = useRef(null);
 
-  const handleNewImageButton = () => { if (image.imageUrl) confirmNewImageDialogRef.current?.showModal(); else uploadNewImage(); }
+  const handleNewImageButton = () => { if (image.url) confirmNewImageDialogRef.current?.showModal(); else uploadNewImage(); }
   const uploadNewImage = () => { inputRef.current.click(); }
   const flipHorizontal = () => { setImage({ ...image, horizontalScale: image.horizontalScale === 1 ? -1 : 1 }) }
   const flipVertical = () => { setImage({ ...image, verticalScale: image.verticalScale === 1 ? -1 : 1 }) }
@@ -106,9 +104,7 @@ function EditButtons({
         referrer={cropImageDialogRef}
         image={image}
         setImage={setImage}
-        imageSizes={imageSizes}
         selectedImageSize={selectedImageSize}
-        setSelectedImageSize={setSelectedImageSize}
         isUserCropping={isUserCropping}
         setIsUserCropping={setIsUserCropping}
         areChangesBeingApplied={areChangesBeingApplied}
@@ -129,9 +125,7 @@ function EditButtons({
 //   isRedoDisabled: PropTypes.bool.isRequired,
 //   applyChangesToImage: PropTypes.func.isRequired,
 //   originalImageBackup: PropTypes.object.isRequired,
-//   imageSizes: PropTypes.array.isRequired,
 //   selectedImageSize: PropTypes.object.isRequired,
-//   setSelectedImageSize: PropTypes.func.isRequired,
 //   isUserAddingFilters: PropTypes.bool.isRequired,
 //   setIsUserAddingFilters: PropTypes.func.isRequired,
 //   isUserCropping: PropTypes.bool.isRequired,

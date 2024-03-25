@@ -2,8 +2,6 @@ import React, { useRef, useEffect } from 'react';
 import '../Dialog.css';
 import './CropImageDialog.css';
 
-import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog.jsx';
-
 // ! Known Bugs
 // 1. Cropper goes a little out of bounds on the bottom-right side
 // 2. There is 2-3px gap inside between the cropper and the image on top-left sides, and outside on the bottom-right sides
@@ -16,17 +14,20 @@ import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog.jsx';
 // ...
 // n. Finally crop the image
 
-function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSelectedImageSize, setIsUserCropping, isUserCropping, imageSizes, areChangesBeingApplied }) {
-  // const imageSizeHandle = (e) => {
-  //   setSelectedImageSize(imageSizes.find(imageSize => imageSize.name === e.target.value));
-  // }
+function CropImageDialog({
+  referrer,
+  image,
+  setImage,
+  selectedImageSize,
+  setIsUserCropping,
+  isUserCropping,
+  areChangesBeingApplied
+}) {
   // ========== DOM references ==========
   // References to the image and canvas elements
   const cropImageRef = useRef(null);
   const cropImageContainerRef = useRef(null);
   const cropperRef = useRef(null);
-  const confirmCropDialogRef = useRef(null);
-  const cancelCropDialogRef = useRef(null);
 
   // ========== Constants/Variables and Initial Values ==========
   const pointersArray = [];
@@ -39,9 +40,7 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
   // ========== Crop Cancel/Confirm ==========
   // Functions to handle the cancel and confirm buttons
   function confirmCropOnConfirm() { cropImage(); referrer.current.close(); setIsUserCropping(false); }
-  function confirmCropOnClose() { confirmCropDialogRef.current.close() }
   function cancelCropOnConfirm() { referrer.current.close(); setIsUserCropping(false); }
-  function cancelCropOnClose() { cancelCropDialogRef.current.close() }
 
   // ========== Crop Image ==========
   // Function to crop the image
@@ -59,7 +58,7 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
       height: cropImageRef.current.height,
     };
     const newImage = new Image();
-    newImage.src = image.imageUrl;
+    newImage.src = image.url;
     newImage.onload = () => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
@@ -76,7 +75,7 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
         canvas.width,
         canvas.height
       );
-      setImage({ ...image, imageUrl: canvas.toDataURL('image/png') });
+      setImage({ ...image, url: canvas.toDataURL('image/png') });
       setIsUserCropping(false);
     }
   }
@@ -353,34 +352,19 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
     // But pointersArray might change yet it is not added to the dependency array because it is being emptied at the end of the event listener
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isUserCropping]);
+  }, [isUserCropping, areChangesBeingApplied]);
 
   return (
     <dialog className='dialog crop-dialog' ref={referrer}>
       {areChangesBeingApplied ? <div className='dialog-loading-overlay'>Loading...</div> : <></>}
       <div className='crop-dialog-body'>
-        {/* <div className='crop-image-controls'>
-          <div className='crop-image-control image-size-selector-container'>
-            <label htmlFor='crop-dialog-image-size-selector' className='image-size-label'>Image Size:</label>
-            <select className='image-size-selector' onChange={imageSizeHandle} id='crop-dialog-image-size-selector'>
-              <option value={selectedImageSize.name}>{selectedImageSize.name}</option>
-              {
-                imageSizes.map(imageSize => (
-                  <option value={`${imageSize.name}`} key={`${imageSize.name}`}>
-                    {imageSize.name}
-                  </option>
-                ))
-              }
-            </select>
-          </div>
-        </div> */}
         <div className='crop-image-container' ref={cropImageContainerRef}>
-          {(isUserCropping && image.imageUrl && (!areChangesBeingApplied)) &&
+          {(isUserCropping && image.url && (!areChangesBeingApplied)) &&
             <>
               <img
                 ref={cropImageRef}
                 className='crop-image-preview'
-                src={image.imageUrl}
+                src={image.url}
                 alt='To be Cropped'
                 draggable={false}
                 style={{
@@ -397,8 +381,8 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
                   hue-rotate(${image.hueRotate}deg)
                 `,
                 }}
-              width={(cropImageContainerRef.current.clientWidth / cropImageContainerRef.current.clientHeight) > (image.naturalWidth / image.naturalHeight) ? 'auto' : '100%'}
-              height={(cropImageContainerRef.current.clientWidth / cropImageContainerRef.current.clientHeight) > (image.naturalWidth / image.naturalHeight) ? '100%' : 'auto'}
+                width={(cropImageContainerRef.current.clientWidth / cropImageContainerRef.current.clientHeight) > (image.naturalWidth / image.naturalHeight) ? 'auto' : '100%'}
+                height={(cropImageContainerRef.current.clientWidth / cropImageContainerRef.current.clientHeight) > (image.naturalWidth / image.naturalHeight) ? '100%' : 'auto'}
               />
               <div
                 ref={cropperRef}
@@ -429,23 +413,6 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
           Confirm
         </button>
       </div>
-      {/* //! Keeping these here for now, will remove some time later */}
-      <ConfirmationDialog
-        referrer={cancelCropDialogRef}
-        title='Cancel crop?'
-        message='All progress made will be lost.'
-        onConfirm={cancelCropOnConfirm}
-        onClose={cancelCropOnClose}
-        cancelButtonText="Don't cancel"
-        confirmButtonText='Cancel'
-      />
-      <ConfirmationDialog
-        referrer={confirmCropDialogRef}
-        title='Confirm crop?'
-        message='This will overwrite the current image.'
-        onConfirm={confirmCropOnConfirm}
-        onClose={confirmCropOnClose}
-      />
     </dialog>
   )
 }
@@ -455,10 +422,8 @@ function CropImageDialog({ referrer, image, setImage, selectedImageSize, setSele
 //   image: PropTypes.object.isRequired,
 //   setImage: PropTypes.func.isRequired,
 //   selectedImageSize: PropTypes.object.isRequired,
-//   setSelectedImageSize: PropTypes.func.isRequired,
 //   setIsUserCropping: PropTypes.func.isRequired,
 //   isUserCropping: PropTypes.bool.isRequired,
-//   imageSizes: PropTypes.array.isRequired,
 //   areChangesBeingApplied: PropTypes.bool.isRequired,
 // }
 
