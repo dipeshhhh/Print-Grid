@@ -42,7 +42,7 @@ To get started, follow these simple steps:
 
 3. **Run Print Grid**:
   ```shell
-  npm start
+  npm run dev
   ```
 
 4. **Edit and Generate**:
