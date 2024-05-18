@@ -11,6 +11,7 @@
   border-radius: var(--edit-button-radius);
   cursor: pointer;
   border: none;
+  position: relative;
 
   transition: background-color 175ms;
 }

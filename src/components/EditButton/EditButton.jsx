@@ -1,6 +1,8 @@
 import React from "react";
 import './EditButton.css';
 
+import Tooltip from '../Tooltip/Tooltip.jsx';
+
 function EditButton({icon, onClickFunction, text, isDisabled}) {
   return(
     <button 
@@ -9,6 +11,7 @@ function EditButton({icon, onClickFunction, text, isDisabled}) {
     disabled={isDisabled}
     >
       {icon}
+      <Tooltip text={`${text}`} />
     </button>
   )
 }

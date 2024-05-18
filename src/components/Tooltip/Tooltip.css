@@ -1,0 +1,10 @@
+.tooltip {
+    position: absolute;
+    color: var(--text);
+    background-color: var(--background);
+    padding: 5px;;
+    
+    inset: 0;
+    left: 100%;
+    /* inset:0; */
+}
