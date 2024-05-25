@@ -70,23 +70,23 @@ function App() {
   );
   const [selectedSheetSize, setSelectedSheetSize] = useState(
     (localStorage.getItem(LAST_SELECTED_SHEET_SIZE_LOCAL_STORAGE_KEY))
-    ?
-    JSON.parse(localStorage.getItem(LAST_SELECTED_SHEET_SIZE_LOCAL_STORAGE_KEY))
-    :
-    sheetSizes[0]
-    );
+      ?
+      JSON.parse(localStorage.getItem(LAST_SELECTED_SHEET_SIZE_LOCAL_STORAGE_KEY))
+      :
+      sheetSizes[0]
+  );
 
   // Image
   const [isBordered, setIsBordered] = useState(
     (localStorage.getItem(LAST_IS_BORDERED_VALUE_LOCAL_STORAGE_KEY))
-    ?
-    JSON.parse(localStorage.getItem(LAST_IS_BORDERED_VALUE_LOCAL_STORAGE_KEY))
-    :
-    false
+      ?
+      JSON.parse(localStorage.getItem(LAST_IS_BORDERED_VALUE_LOCAL_STORAGE_KEY))
+      :
+      false
   );
   const [image, setImage] = useState({ ...INITIAL_IMAGE_STATE });
 
-  useEffect(()=>{
+  useEffect(() => {
     localStorage.setItem(LAST_IS_BORDERED_VALUE_LOCAL_STORAGE_KEY, JSON.stringify(isBordered));
   }, [isBordered]);
 

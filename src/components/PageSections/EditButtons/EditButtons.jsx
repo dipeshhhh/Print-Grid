@@ -71,7 +71,7 @@ function EditButtons({
 
   return (
     <section className='section edit-buttons-section'>
-      <div className='topbar'>
+      <div className='topbar edit-button-topbar'>
         <button className='topbar-button' onClick={handleNewImageButton}>New</button>
         <ConfirmationDialog
           title={'Open new image?'}

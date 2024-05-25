@@ -2,6 +2,7 @@
   --topbar-height: 25px;
   --topbar-button-radius: var(--button-radius);
   --section-radius: var(--container-radius);
+  --section-max-height: calc(100vh - (var(--app-gap) * 2));
 }
 
 .section {
@@ -9,7 +10,7 @@
   flex-direction: column;
   background-color: var(--background-secondary);
   border-radius: var(--section-radius);
-  max-height: calc(100vh - (var(--app-gap) * 2));
+  max-height: var(--section-max-height);
   gap: var(--app-gap);
 }
 
@@ -51,5 +52,9 @@
 @media screen and (max-width: 768px) {
   .topbar {
     height: auto;
+  }
+
+  .topbar-button {
+    height: var(--edit-button-section-width);
   }
 }

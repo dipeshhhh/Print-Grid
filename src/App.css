@@ -1,26 +1,21 @@
 :root {
   --app-gap: 10px;
-
   --edit-button-section-width: 50px;
-
   --toggle-theme-button-width: 50px;
   --file-input-button-width: 88px;
-
   --primary-button-padding: 16px;
 }
 
 .App {
   display: grid;
-  grid-template-columns: var(--edit-button-section-width) repeat(2, 1fr);
+  /* grid-template-columns: var(--edit-button-section-width) repeat(2, 1fr); */
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--app-gap);
   padding: var(--app-gap);
   height: 100vh;
   position: relative;
+  padding-left: calc(2 * var(--app-gap) + var(--edit-button-section-width));
 }
-
-/* .App>* {
-  height: 100%;
-} */
 
 .primary-button {
   background-color: var(--primary);
@@ -45,5 +40,7 @@
     flex-direction: column;
     height: auto;
     min-height: 100vh;
+    padding-left: var(--app-gap);
+    padding-top: calc(2 * var(--app-gap) + var(--edit-button-section-width));
   }
 }

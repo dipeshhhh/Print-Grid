@@ -1,5 +1,17 @@
 :root {
   --edit-button-radius: var(--button-radius);
+  --arrow-size: 10px;
+}
+
+.edit-button-container {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  width: var(--edit-button-section-width);
+}
+
+.edit-button-container:hover {
+  width: calc(var(--edit-button-section-width) + 120px + var(--arrow-size));
 }
 
 .edit-button {
@@ -24,4 +36,81 @@
   background-color: var(--secondary-disabled);
   color: var(--text-disabled);
   cursor: not-allowed;
+}
+
+.edit-button::before,
+.edit-button::after {
+  --scale: 0;
+
+  position: absolute;
+  right: .25rem;
+  top: 50%;
+  transform: translateX(var(--translate-x, 0)) translateY(-50%) scale(var(--scale));
+  transition: 150ms transform;
+  transform-origin: left center;
+}
+
+.edit-button::before {
+  --translate-x: calc(100% + var(--arrow-size));
+
+  font-size: small;
+  content: attr(data-tooltip);
+  color: (--text);
+  background-color: var(--background);
+  padding: 0.5rem;
+  width: max-content;
+  max-width: 120px;
+  border-radius: .3rem;
+  text-align: center;
+}
+
+.edit-button:hover::before,
+.edit-button:hover::after {
+  --scale: 1;
+}
+
+.edit-button::after {
+  --translate-x: calc(1 * var(--arrow-size));
+
+  content: '';
+  border: var(--arrow-size) solid transparent;
+  border-right-color: var(--background);
+  transform-origin: right center;
+}
+
+@media screen and (max-width: 768px) {
+  .edit-button-container {
+    height: var(--edit-button-section-width);
+  }
+
+  .edit-button-container:hover {
+    height: calc(var(--edit-button-section-width) + 50px + var(--arrow-size));
+    width: calc(var(--edit-button-container-width));
+  }
+
+  .edit-button::before,
+  .edit-button::after {
+    bottom: .25rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(var(--translate-y, 0)) scale(var(--scale));
+    transform-origin: top center;
+  }
+
+  .edit-button::before {
+    --translate-y: calc(50% + var(--arrow-size));
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: max-content;
+    max-height: 50px;
+  }
+
+  .edit-button::after {
+    --translate-y: calc(1 * var(--arrow-size));
+
+    border: var(--arrow-size) solid transparent;
+    border-bottom-color: var(--background);
+    transform-origin: bottom center
+  }
 }

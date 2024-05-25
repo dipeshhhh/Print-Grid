@@ -1,18 +1,18 @@
 import React from "react";
 import './EditButton.css';
 
-import Tooltip from '../Tooltip/Tooltip.jsx';
-
-function EditButton({icon, onClickFunction, text, isDisabled}) {
-  return(
-    <button 
-    className='edit-button'
-    onClick={onClickFunction}
-    disabled={isDisabled}
-    >
-      {icon}
-      <Tooltip text={`${text}`} />
-    </button>
+function EditButton({ icon, onClickFunction, text, isDisabled }) {
+  return (
+    <div className='edit-button-container'>
+      <button
+        className='edit-button'
+        data-tooltip={`${text}`}
+        onClick={onClickFunction}
+        disabled={isDisabled}
+      >
+        {icon}
+      </button>
+    </div>
   )
 }
 
