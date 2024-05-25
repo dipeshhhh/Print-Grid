@@ -1,6 +1,10 @@
 :root {
   --edit-button-radius: var(--button-radius);
   --arrow-size: 10px;
+  --tooltip-bg-color: var(--text);
+  --tooltip-text-color: var(--background);
+  --tooltip-max-width: 165px;
+  --tooltip-max-height: 50px;
 }
 
 .edit-button-container {
@@ -11,7 +15,7 @@
 }
 
 .edit-button-container:hover {
-  width: calc(var(--edit-button-section-width) + 120px + var(--arrow-size));
+  width: calc(var(--edit-button-section-width) + var(--tooltip-max-width) + var(--arrow-size));
 }
 
 .edit-button {
@@ -51,17 +55,18 @@
 }
 
 .edit-button::before {
-  --translate-x: calc(100% + var(--arrow-size));
+  --translate-x: calc(100% + var(--arrow-size) - 1.5px);
 
   font-size: small;
   content: attr(data-tooltip);
-  color: (--text);
-  background-color: var(--background);
+  color: var(--tooltip-text-color);
+  background-color: var(--tooltip-bg-color);
   padding: 0.5rem;
   width: max-content;
-  max-width: 120px;
-  border-radius: .3rem;
+  max-width: var(--tooltip-max-width);
+  border-radius: var(--container-radius);
   text-align: center;
+  z-index: 2;
 }
 
 .edit-button:hover::before,
@@ -74,8 +79,9 @@
 
   content: '';
   border: var(--arrow-size) solid transparent;
-  border-right-color: var(--background);
+  border-right-color: var(--tooltip-bg-color);
   transform-origin: right center;
+  z-index: 1;
 }
 
 @media screen and (max-width: 768px) {
@@ -84,7 +90,7 @@
   }
 
   .edit-button-container:hover {
-    height: calc(var(--edit-button-section-width) + 50px + var(--arrow-size));
+    height: calc(var(--edit-button-section-width) + var(--tooltip-max-height) + var(--arrow-size));
     width: calc(var(--edit-button-container-width));
   }
 
@@ -97,20 +103,21 @@
   }
 
   .edit-button::before {
-    --translate-y: calc(50% + var(--arrow-size));
+    --translate-y: calc(65% + var(--arrow-size));
 
     display: flex;
     align-items: center;
     justify-content: center;
     height: max-content;
-    max-height: 50px;
+    max-height: var(--tooltip-max-height);
+    max-width: none;
   }
 
   .edit-button::after {
     --translate-y: calc(1 * var(--arrow-size));
 
     border: var(--arrow-size) solid transparent;
-    border-bottom-color: var(--background);
+    border-bottom-color: var(--tooltip-bg-color);
     transform-origin: bottom center
   }
 }

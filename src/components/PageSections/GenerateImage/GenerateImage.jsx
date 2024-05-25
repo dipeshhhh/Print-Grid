@@ -200,8 +200,8 @@ function GenerateImage({
           message='This will remove all the saved custom image sizes on this site.'
           onConfirm={clearCustomSizes}
         />
-        <button className='primary-button' onClick={generateResultImage} disabled={isGenerateDisabled}>Generate</button>
-        <button className='primary-button' onClick={downloadImage} disabled={isDownloadDisabled}>Download</button>
+        <button className='primary-button topbar-button' onClick={generateResultImage} disabled={isGenerateDisabled}>Generate</button>
+        <button className='primary-button topbar-button' onClick={downloadImage} disabled={isDownloadDisabled}>Download</button>
       </div>
       <div className='generate-image-section-main'>
         {resultImage && !isResultLoading ?
