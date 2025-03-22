@@ -8,7 +8,7 @@ import ConfirmationDialog from "../../Dialogs/ConfirmationDialog/ConfirmationDia
 import FiltersDialog from "../../Dialogs/FiltersDialog/FiltersDialog";
 import CropImageDialog from "../../Dialogs/CropImageDialog/CropImageDialog";
 
-import { useImage } from "../../../contexts/imageContext";
+import { useImage } from "../../../contexts/ImageContext";
 import { useChangeManagement } from "../../../contexts/ChangeManagementContext";
 import { useHistory } from "../../../contexts/HistoryContext";
 

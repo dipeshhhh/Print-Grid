@@ -11,7 +11,7 @@ import { INITIAL_IMAGE_SIZES, INITIAL_IMAGE_STATE } from '../../../utils/initial
 import CustomSizeDialog from '../../Dialogs/CustomSizeDialog/CustomSizeDialog.jsx';
 import ConfirmationDialog from '../../Dialogs/ConfirmationDialog/ConfirmationDialog.jsx';
 
-import { useImage } from '../../../contexts/imageContext.jsx';
+import { useImage } from '../../../contexts/ImageContext.jsx';
 
 function ImageSection({}) {
   const {

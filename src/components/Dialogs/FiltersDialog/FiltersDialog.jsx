@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import '../Dialog.css';
 import './FiltersDialog.css';
 
-import { useImage } from '../../../contexts/imageContext';
+import { useImage } from '../../../contexts/ImageContext';
 import { useChangeManagement } from '../../../contexts/ChangeManagementContext';
 
 function FilterRangeInput({ icon, label, min, max, value, onChange }) {

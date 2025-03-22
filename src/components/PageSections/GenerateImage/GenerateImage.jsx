@@ -10,7 +10,7 @@ import { INITIAL_SHEET_SIZES } from '../../../utils/initialValues.js';
 import CustomSizeDialog from '../../Dialogs/CustomSizeDialog/CustomSizeDialog.jsx';
 import ConfirmationDialog from '../../Dialogs/ConfirmationDialog/ConfirmationDialog.jsx';
 
-import { useImage } from '../../../contexts/imageContext.jsx';
+import { useImage } from '../../../contexts/ImageContext.jsx';
 import { useChangeManagement } from '../../../contexts/ChangeManagementContext.jsx';
 
 function GenerateImage({}) {

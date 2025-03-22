@@ -1,7 +1,7 @@
 import { createContext, useContext, useRef, useEffect } from "react";
 import { areObjectsDeepEqual } from "../utils/helpers";
 import { useChangeManagement } from "./ChangeManagementContext";
-import { useImage } from "./imageContext";
+import { useImage } from "./ImageContext";
 import { HISTORY_LIMIT } from "../utils/configs";
 
 const HistoryContext = createContext();

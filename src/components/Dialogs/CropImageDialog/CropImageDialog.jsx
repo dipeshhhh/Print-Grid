@@ -3,7 +3,7 @@ import '../Dialog.css';
 import './CropImageDialog.css';
 
 import { useChangeManagement } from '../../../contexts/ChangeManagementContext';
-import { useImage } from '../../../contexts/imageContext';
+import { useImage } from '../../../contexts/ImageContext';
 
 // ! Known Bugs
 // 1. Cropper goes a little out of bounds on the bottom-right side
