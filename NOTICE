@@ -1,0 +1,22 @@
+This project is licensed under the MIT License.
+
+Third-Party Licenses:
+
+1. Vite
+   Source: https://github.com/vitejs/vite
+   License: MIT License (https://github.com/vitejs/vite/blob/main/LICENSE)
+
+2. React
+   Source: https://github.com/facebook/react
+   License: MIT License (https://github.com/facebook/react/blob/main/LICENSE)
+
+3. Material Design Icons  
+   Source: https://github.com/google/material-design-icons  
+   License: Apache License 2.0 (https://github.com/google/material-design-icons/blob/main/LICENSE)  
+
+The above library is redistributed in this project under its respective license.
+All trademarks, logos, and brand names are the property of their respective owners.
+
+----
+
+This NOTICE file is provided to ensure proper attribution of third-party resources and compliance with their licensing terms.
