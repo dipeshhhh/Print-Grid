@@ -2,22 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import '../Dialog.css';
 import './FiltersDialog.css';
 
-// Icons
-import FilterBAndWIcon from '@mui/icons-material/FilterBAndW';
-import BrightnessMediumIcon from '@mui/icons-material/BrightnessMedium';
-import ContrastIcon from '@mui/icons-material/Contrast';
-import OpacityIcon from '@mui/icons-material/Opacity';
-import WhatshotIcon from '@mui/icons-material/Whatshot';
-import ColorLensIcon from '@mui/icons-material/ColorLens';
-import RestoreIcon from '@mui/icons-material/Restore'
-
 import { useImage } from '../../../contexts/imageContext';
 import { useChangeManagement } from '../../../contexts/ChangeManagementContext';
 
 function FilterRangeInput({ icon, label, min, max, value, onChange }) {
   return (
     <div className='filters-adjustment-item'>
-      <span className='filter-adjustment-label'>{icon} {label}</span>
+      <span className='filter-adjustment-label'><span className="material-symbols-outlined">{icon}</span> {label}</span>
       {window.innerWidth < 375 ?
         <span className='responsive-adjustment-input'>
           <input className='filter-adjustment-input' type='range' min={min} max={max} value={value} onChange={onChange} />
@@ -38,12 +29,12 @@ function FilterCheckboxInput({ icon, label, checked, onChange }) {
     <div className='filters-adjustment-item'>
       {window.innerWidth < 375 ?
         <span className='responsive-adjustment-input'>
-          <span className='filter-adjustment-label'>{icon} {label}</span>
+          <span className='filter-adjustment-label'><span className="material-symbols-outlined">{icon}</span> {label}</span>
           <input className='filter-adjustment-input' type='checkbox' checked={checked} onChange={onChange} />
         </span>
         :
         <>
-          <span className='filter-adjustment-label'>{icon} {label}</span>
+          <span className='filter-adjustment-label'><span className="material-symbols-outlined">{icon}</span> {label}</span>
           <input className='filter-adjustment-input' type='checkbox' checked={checked} onChange={onChange} />
         </>
       }
@@ -93,15 +84,15 @@ function FiltersDialog({
   const resetFilters = () => { setPreviewImage({ ...image }) }
 
   const filterRangeAdjustments = [
-    { icon: <BrightnessMediumIcon />, label: 'Brightness:', min: 0, max: 200, value: previewImage?.brightness, onChange: setBrightness },
-    { icon: <ContrastIcon />, label: 'Contrast:', min: 0, max: 200, value: previewImage?.contrast, onChange: setContrast },
-    { icon: <OpacityIcon />, label: 'Saturate:', min: 0, max: 200, value: previewImage?.saturate, onChange: setSaturate },
-    { icon: <WhatshotIcon />, label: 'Sepia:', min: 0, max: 100, value: previewImage?.sepia, onChange: setSepia },
-    { icon: <ColorLensIcon />, label: 'Hue:', min: 0, max: 360, value: previewImage?.hueRotate, onChange: setHueRotate },
+    { icon: "brightness_medium", label: 'Brightness:', min: 0, max: 200, value: previewImage?.brightness, onChange: setBrightness },
+    { icon: "contrast", label: 'Contrast:', min: 0, max: 200, value: previewImage?.contrast, onChange: setContrast },
+    { icon: "opacity", label: 'Saturate:', min: 0, max: 200, value: previewImage?.saturate, onChange: setSaturate },
+    { icon: "mode_heat", label: 'Sepia:', min: 0, max: 100, value: previewImage?.sepia, onChange: setSepia },
+    { icon: "palette", label: 'Hue:', min: 0, max: 360, value: previewImage?.hueRotate, onChange: setHueRotate },
   ]
 
   const filterChecboxAdjustments = [
-    { icon: <FilterBAndWIcon />, label: 'Grayscale', checked: previewImage?.grayscale === 1, onChange: grayscale }
+    { icon: "filter_b_and_w", label: 'Grayscale', checked: previewImage?.grayscale === 1, onChange: grayscale }
   ]
 
   return (
@@ -161,7 +152,7 @@ function FiltersDialog({
                 ))
               }
               <div className='empty-gap'></div>
-              <button className='dialog-button  filter-reset-button' onClick={resetFilters}><RestoreIcon />Reset</button>
+              <button className='dialog-button  filter-reset-button' onClick={resetFilters}><span className="material-symbols-outlined">history</span>Reset</button>
             </section>
           </section>
         </main>

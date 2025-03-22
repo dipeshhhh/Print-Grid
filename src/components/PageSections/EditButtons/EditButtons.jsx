@@ -8,17 +8,6 @@ import ConfirmationDialog from "../../Dialogs/ConfirmationDialog/ConfirmationDia
 import FiltersDialog from "../../Dialogs/FiltersDialog/FiltersDialog";
 import CropImageDialog from "../../Dialogs/CropImageDialog/CropImageDialog";
 
-// Icons
-import SwapVertIcon from '@mui/icons-material/SwapVert';
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
-import Rotate90DegreesCcwIcon from '@mui/icons-material/Rotate90DegreesCcw';
-import Rotate90DegreesCwIcon from '@mui/icons-material/Rotate90DegreesCw';
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import CropIcon from '@mui/icons-material/Crop';
-import UndoIcon from '@mui/icons-material/Undo';
-import RedoIcon from '@mui/icons-material/Redo';
-import RestoreIcon from '@mui/icons-material/Restore';
-
 import { useImage } from "../../../contexts/imageContext";
 import { useChangeManagement } from "../../../contexts/ChangeManagementContext";
 import { useHistory } from "../../../contexts/HistoryContext";
@@ -61,15 +50,15 @@ function EditButtons({}) {
 
   // Edit buttons (to prevent repetition of code)
   const buttons = [
-    { icon: <SwapVertIcon />, text: 'Flip vertical', onClickFunction: flipVertical, isDisabled: isEditDisabled },
-    { icon: <SwapHorizIcon />, text: 'Flip horizontal', onClickFunction: flipHorizontal, isDisabled: isEditDisabled },
-    { icon: <Rotate90DegreesCwIcon />, text: 'Rotate clockwise', onClickFunction: rotateClockwise, isDisabled: isEditDisabled },
-    { icon: <Rotate90DegreesCcwIcon />, text: 'Rotate counter-clockwise', onClickFunction: rotateAntiClockwise, isDisabled: isEditDisabled },
-    { icon: <FilterAltIcon />, text: 'Filters', onClickFunction: filters, isDisabled: isEditDisabled },
-    { icon: <CropIcon />, text: 'Crop', onClickFunction: crop, isDisabled: isEditDisabled },
-    { icon: <UndoIcon />, text: 'Undo', onClickFunction: undo, isDisabled: (isUndoDisabled || isEditDisabled) },
-    { icon: <RedoIcon />, text: 'Redo', onClickFunction: redo, isDisabled: (isRedoDisabled || isEditDisabled) },
-    { icon: <RestoreIcon />, text: 'Reset', onClickFunction: reset, isDisabled: isEditDisabled }
+    { icon: 'swap_vert', text: 'Flip vertical', onClickFunction: flipVertical, isDisabled: isEditDisabled },
+    { icon: 'swap_horiz', text: 'Flip horizontal', onClickFunction: flipHorizontal, isDisabled: isEditDisabled },
+    { icon: 'rotate_90_degrees_cw', text: 'Rotate clockwise', onClickFunction: rotateClockwise, isDisabled: isEditDisabled },
+    { icon: 'rotate_90_degrees_ccw', text: 'Rotate counter-clockwise', onClickFunction: rotateAntiClockwise, isDisabled: isEditDisabled },
+    { icon: 'tune', text: 'Filters', onClickFunction: filters, isDisabled: isEditDisabled },
+    { icon: 'crop', text: 'Crop', onClickFunction: crop, isDisabled: isEditDisabled },
+    { icon: 'undo', text: 'Undo', onClickFunction: undo, isDisabled: (isUndoDisabled || isEditDisabled) },
+    { icon: 'redo', text: 'Redo', onClickFunction: redo, isDisabled: (isRedoDisabled || isEditDisabled) },
+    { icon: 'history', text: 'Reset', onClickFunction: reset, isDisabled: isEditDisabled }
   ];
 
   return (

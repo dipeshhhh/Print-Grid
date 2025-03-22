@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ThemeSwitchButton.css';
 
-// Icons
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
-
 function ThemeSwitchButton() {
   const [isDarkTheme, setIsDarkTheme] = useState(true); // true: default to dark theme
 
@@ -32,7 +28,7 @@ function ThemeSwitchButton() {
 
   return (
     <button className='theme-switch-button' onClick={toggleTheme}>
-      {isDarkTheme ? <LightModeIcon /> : <DarkModeIcon />}
+      <span className="material-symbols-outlined">{isDarkTheme ? "light_mode" : "dark_mode"}</span>
     </button>
   );
 }

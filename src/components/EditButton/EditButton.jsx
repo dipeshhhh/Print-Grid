@@ -10,7 +10,7 @@ function EditButton({ icon, onClickFunction, text, isDisabled }) {
         onClick={onClickFunction}
         disabled={isDisabled}
       >
-        {icon}
+        <span className="material-symbols-outlined">{icon}</span>
       </button>
     </div>
   )

@@ -1,5 +1,14 @@
 @import url('https://fonts.googleapis.com/css?family=Poppins:700|Poppins:400');
 
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 1
+  /* , */
+  /* 'wght' 700,
+  'GRAD' 0,
+  'opsz' 24 */
+}
+
 :root {
   --button-radius: 5px;
   --container-radius: 10px;

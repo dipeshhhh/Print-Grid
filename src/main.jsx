@@ -5,6 +5,9 @@ import './index.css'
 import { ImageProvider } from './contexts/imageContext.jsx'
 import { ChangeManagementProvider } from './contexts/ChangeManagementContext.jsx'
 import { HistoryProvider } from './contexts/HistoryContext.jsx'
+import { loadMaterialDesignSymbols } from './utils/loadMaterialDesignSymbols.js'
+
+loadMaterialDesignSymbols();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
