@@ -10,18 +10,24 @@ import { INITIAL_SHEET_SIZES } from '../../../utils/initialValues.js';
 import CustomSizeDialog from '../../Dialogs/CustomSizeDialog/CustomSizeDialog.jsx';
 import ConfirmationDialog from '../../Dialogs/ConfirmationDialog/ConfirmationDialog.jsx';
 
-function GenerateImage({
-  image,
-  isBordered,
-  isGenerateDisabled,
-  generatingResultFlag,
-  selectedImageSize,
-  sheetSizes,
-  setSheetSizes,
-  selectedSheetSize,
-  setSelectedSheetSize,
-  applyChangesToImage
-}) {
+import { useImage } from '../../../contexts/imageContext.jsx';
+import { useChangeManagement } from '../../../contexts/ChangeManagementContext.jsx';
+
+function GenerateImage({}) {
+  const {
+    isGenerateDisabled,
+    generatingResultFlag
+  } = useChangeManagement();
+  const {
+    image,
+    isBordered,
+    applyChangesToImage,
+    selectedImageSize,
+    sheetSizes,
+    setSheetSizes,
+    selectedSheetSize,
+    setSelectedSheetSize,
+  } = useImage();
   const [resultImage, setResultImage] = useState(null);
   const [isDownloadDisabled, setIsDownloadDisabled] = useState(true);
   const [isResultLoading, setIsResultLoading] = useState(false);

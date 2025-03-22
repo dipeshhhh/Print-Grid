@@ -2,6 +2,9 @@ import React, { useRef, useEffect } from 'react';
 import '../Dialog.css';
 import './CropImageDialog.css';
 
+import { useChangeManagement } from '../../../contexts/ChangeManagementContext';
+import { useImage } from '../../../contexts/imageContext';
+
 // ! Known Bugs
 // 1. Cropper goes a little out of bounds on the bottom-right side
 // 2. There is 2-3px gap inside between the cropper and the image on top-left sides, and outside on the bottom-right sides
@@ -16,13 +19,17 @@ import './CropImageDialog.css';
 
 function CropImageDialog({
   referrer,
-  image,
-  setImage,
-  selectedImageSize,
-  setIsUserCropping,
-  isUserCropping,
-  areChangesBeingApplied
+  // selectedImageSize,
+  // setIsUserCropping,
+  // isUserCropping,
+  // areChangesBeingApplied
 }) {
+  const { image, setImage, selectedImageSize } = useImage();
+  const {
+    isUserCropping,
+    setIsUserCropping,
+    areChangesBeingApplied
+  } = useChangeManagement();
   // ========== DOM references ==========
   // References to the image and canvas elements
   const cropImageRef = useRef(null);

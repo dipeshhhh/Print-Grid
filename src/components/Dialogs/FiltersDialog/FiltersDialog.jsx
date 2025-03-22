@@ -11,6 +11,9 @@ import WhatshotIcon from '@mui/icons-material/Whatshot';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
 import RestoreIcon from '@mui/icons-material/Restore'
 
+import { useImage } from '../../../contexts/imageContext';
+import { useChangeManagement } from '../../../contexts/ChangeManagementContext';
+
 function FilterRangeInput({ icon, label, min, max, value, onChange }) {
   return (
     <div className='filters-adjustment-item'>
@@ -52,10 +55,11 @@ function FiltersDialog({
   referrer,
   isUserAddingFilters,
   setIsUserAddingFilters,
-  image,
-  setImage,
-  areChangesBeingApplied
 }) {
+  const { image, setImage } = useImage();
+  const {
+    areChangesBeingApplied
+  } = useChangeManagement();
   const previewImageRef = useRef(null);
   const [previewImage, setPreviewImage] = useState(null);
   const onClose = () => { setIsUserAddingFilters(false) };

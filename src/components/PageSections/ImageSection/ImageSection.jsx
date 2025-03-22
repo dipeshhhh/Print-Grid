@@ -11,18 +11,21 @@ import { INITIAL_IMAGE_SIZES, INITIAL_IMAGE_STATE } from '../../../utils/initial
 import CustomSizeDialog from '../../Dialogs/CustomSizeDialog/CustomSizeDialog.jsx';
 import ConfirmationDialog from '../../Dialogs/ConfirmationDialog/ConfirmationDialog.jsx';
 
-function ImageSection({
-  image,
-  setImage,
-  originalImageBackup,
-  isBordered,
-  setIsBordered,
-  inputRef,
-  imageSizes,
-  setImageSizes,
-  selectedImageSize,
-  setSelectedImageSize
-}) {
+import { useImage } from '../../../contexts/imageContext.jsx';
+
+function ImageSection({}) {
+  const {
+    inputRef,
+    image,
+    setImage,
+    originalImageBackup,
+    isBordered,
+    setIsBordered,
+    imageSizes,
+    setImageSizes,
+    selectedImageSize,
+    setSelectedImageSize
+  } = useImage();
   const [isUserDroppingImage, setIsUserDroppingImage] = useState(false);
   const newUploadFiles = useRef(null);
   const confirmNewUploadRef = useRef(null);

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import '../PageSections.css';
 import './EditButtons.css';
 
@@ -19,30 +19,33 @@ import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-function EditButtons({
-  image,
-  setImage,
-  inputRef,
-  editHistory,
-  editHistoryIndex,
-  redoFlag,
-  isEditDisabled,
-  isUndoDisabled,
-  isRedoDisabled,
-  applyChangesToImage,
-  originalImageBackup,
+import { useImage } from "../../../contexts/imageContext";
+import { useChangeManagement } from "../../../contexts/ChangeManagementContext";
+import { useHistory } from "../../../contexts/HistoryContext";
 
-  // Prop drilling
-  selectedImageSize,
-  isUserAddingFilters,
-  setIsUserAddingFilters,
-  isUserCropping,
-  setIsUserCropping,
-  areChangesBeingApplied
-}) {
+function EditButtons({}) {
+  const {
+    inputRef,
+    image,
+    setImage,
+    originalImageBackup,
+    applyChangesToImage
+  } = useImage();
+  const {
+    setIsUserCropping,
+    isEditDisabled,
+    isUndoDisabled,
+    isRedoDisabled
+  } = useChangeManagement();
+  const {
+    editHistory,
+    editHistoryIndex,
+    redoFlag
+  } = useHistory();
   const cropImageDialogRef = useRef(null);
   const confirmNewImageDialogRef = useRef(null);
   const filterDialogRef = useRef(null);
+  const [isUserAddingFilters, setIsUserAddingFilters] = useState(false);
 
   const handleNewImageButton = () => { if (image.url) confirmNewImageDialogRef.current?.showModal(); else uploadNewImage(); }
   const uploadNewImage = () => { inputRef.current.click(); }
@@ -94,20 +97,11 @@ function EditButtons({
       </div>
       <FiltersDialog
         referrer={filterDialogRef}
-        image={image}
-        setImage={setImage}
         isUserAddingFilters={isUserAddingFilters}
         setIsUserAddingFilters={setIsUserAddingFilters}
-        areChangesBeingApplied={areChangesBeingApplied}
       />
       <CropImageDialog
         referrer={cropImageDialogRef}
-        image={image}
-        setImage={setImage}
-        selectedImageSize={selectedImageSize}
-        isUserCropping={isUserCropping}
-        setIsUserCropping={setIsUserCropping}
-        areChangesBeingApplied={areChangesBeingApplied}
       />
     </section>
   )
