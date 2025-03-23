@@ -1,7 +1,6 @@
 :root {
-  --app-gap: 10px;
+  --app-gap: 10px; /* Gap between different sections of the page. */
   --edit-button-section-width: 50px;
-  --toggle-theme-button-width: 50px;
   --file-input-button-width: 88px;
   --primary-button-padding: 16px;
 }
@@ -20,7 +19,7 @@
 .primary-button {
   background-color: var(--primary);
   color: var(--text);
-  border-radius: var(--topbar-button-radius);
+  border-radius: var(--button-radius);
   border-width: 0px;
   cursor: pointer;
   padding: 0px var(--primary-button-padding);

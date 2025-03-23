@@ -31,6 +31,7 @@
   border-width: 0px;
   cursor: pointer;
   height: var(--topbar-height);
+  font-weight: 700;
 
   transition: background-color 175ms;
 }

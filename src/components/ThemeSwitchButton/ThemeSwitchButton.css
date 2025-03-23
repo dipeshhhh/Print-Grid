@@ -1,3 +1,8 @@
+:root {
+  /* --toggle-theme-button-width: 50px; */
+  --toggle-theme-button-width: var(--edit-button-section-width, 50px);
+}
+
 .theme-switch-button {
   position: fixed;
   bottom: 0;
