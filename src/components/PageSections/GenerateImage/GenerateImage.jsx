@@ -13,7 +13,25 @@ import ConfirmationDialog from '../../Dialogs/ConfirmationDialog/ConfirmationDia
 import { useImage } from '../../../contexts/ImageContext.jsx';
 import { useChangeManagement } from '../../../contexts/ChangeManagementContext.jsx';
 
-function GenerateImage({}) {
+function getCanvasFiltersFromImage(image) {
+  // Adjust Canvas filters to visually match CSS filter behavior more accurately.
+  // Each filter is tweaked to handle CSS-to-Canvas inconsistencies:
+  // - Brightness, contrast, and saturation: Scaled gently to avoid harsh boosts.
+  // - Grayscale: Left unchanged as it behaves the same in CSS/Canvas.
+  // - Sepia: Divided for a softer, more natural tint.
+  // - Hue-rotate: Halved to prevent over-rotation, staying visually consistent with CSS previews.
+
+  return (`
+    brightness(${1 + (image.brightness - 100) / 200})
+    contrast(${1 + (image.contrast - 100) / 200})
+    saturate(${1 + (image.saturate - 100) / 200})
+    grayscale(${image.grayscale})
+    sepia(${image.sepia / 200})
+    hue-rotate(${(image.hueRotate / 2)}deg)
+  `);
+}
+
+function GenerateImage({ }) {
   const {
     isGenerateDisabled,
     generatingResultFlag
@@ -81,14 +99,7 @@ function GenerateImage({}) {
         inputImageCanvas.height = selectedImageSize.height;
         inputImageCtx.fillStyle = INPUT_IMAGE_BACKGROUND_COLOR;
         inputImageCtx.fillRect(0, 0, inputImageCanvas.width, inputImageCanvas.height);
-        inputImageCtx.filter = `
-          brightness(${image.brightness}%)
-          contrast(${image.contrast}%)
-          saturate(${image.saturate}%)
-          grayscale(${image.grayscale})
-          sepia(${image.sepia}%)
-          hue-rotate(${image.hueRotate}deg)
-        `;
+        inputImageCtx.filter = getCanvasFiltersFromImage(image);
 
         // Adjust and center the image to fit the selected image size
         let newWidth, newHeight, x, y;
