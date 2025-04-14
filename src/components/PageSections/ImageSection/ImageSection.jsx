@@ -185,6 +185,7 @@ function ImageSection({}) {
           accept='image/*'
           ref={inputRef}
           onChange={loadImageFromInputEvent}
+          tabIndex={-1}
         />
         <ConfirmationDialog
           referrer={confirmNewUploadRef}
