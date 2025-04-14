@@ -190,9 +190,15 @@ function GenerateImage({ }) {
   }
 
   return (
-    <section className='section generate-image-section'>
+    <section className={`section generate-image-section 
+    ${(isGenerateDisabled && !resultImage) ? 'section-disabled' : ''}`}>
       <div className='topbar'>
-        <select className='topbar-selector' onChange={handleSizeChange} ref={sheetSizeSelectorRef}>
+        <select
+          disabled={(isGenerateDisabled && !resultImage)}
+          className='topbar-selector'
+          onChange={handleSizeChange}
+          ref={sheetSizeSelectorRef}
+        >
           {
             sheetSizes.map(sheetSize => (
               <option value={`${sheetSize.name}`} key={`${sheetSize.name}`}>{sheetSize.name}</option>
