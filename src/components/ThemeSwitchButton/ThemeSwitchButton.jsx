@@ -15,10 +15,12 @@ function ThemeSwitchButton() {
     const storedTheme = localStorage.getItem('theme');
     if (storedTheme) {
       setIsDarkTheme(storedTheme.toLowerCase() === 'dark');
-    } else {
-      // Check user's system preference if theme preference is not stored
-      setIsDarkTheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
     }
+    //? To check if user prefers dark theme apps on their device (Default to dark-theme right now)
+    // else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+    //   // Check user's system preference if theme preference is not stored
+    //   setIsDarkTheme(false);
+    // }
   }, []);
 
   useEffect(() => {
